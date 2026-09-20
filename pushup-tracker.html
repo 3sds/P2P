@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Samen de wereld rond</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EEF1EA;
+    --paper:#F8FAF5;
+    --ink:#1C2B22;
+    --ink-soft:#5B6B60;
+    --line:#D7DECB;
+    --accent:#E15A3F;
+    --done:#2F6B4F;
+    --gold:#DDA13B;
+    --europa:#3B6EA5;
+    --afrika:#D98A3D;
+    --antarctica:#5FA8C9;
+    --zuidamerika:#4F9B6B;
+    --noordamerika:#7A5C8E;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:480px;
+    margin:0 auto;
+    padding:24px 18px 60px;
+    min-height:100vh;
+  }
+  h1,h2,h3{font-family:'Fraunces',serif; margin:0;}
+  h1{font-size:1.85rem; font-weight:700; letter-spacing:-0.01em;}
+  .tagline{color:var(--ink-soft); font-size:0.95rem; margin-top:4px;}
+
+  /* ---------- Gate ---------- */
+  #gate{
+    position:fixed; inset:0; background:var(--bg);
+    display:flex; align-items:center; justify-content:center;
+    z-index:50; padding:24px;
+  }
+  #gate .card{
+    background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
+    padding:28px 24px; max-width:360px; width:100%; text-align:center;
+    box-shadow:0 8px 24px rgba(28,43,34,0.06);
+  }
+  #gate input{
+    width:100%; margin-top:16px; padding:12px 14px; border-radius:10px;
+    border:1px solid var(--line); font-size:1rem; font-family:'Inter',sans-serif;
+    background:#fff;
+  }
+  #gate button, .btn{
+    margin-top:14px; width:100%; padding:12px 14px; border:none; border-radius:10px;
+    background:var(--ink); color:var(--paper); font-weight:600; font-size:1rem;
+    font-family:'Inter',sans-serif; cursor:pointer;
+  }
+  #gate .error{color:var(--accent); font-size:0.85rem; margin-top:10px; display:none;}
+
+  /* ---------- Name picker ---------- */
+  .namePick-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px;}
+  .nameBtn{
+    padding:10px 14px; border-radius:10px; border:1px solid var(--line);
+    background:#fff; font-family:'Inter',sans-serif; font-weight:600; cursor:pointer;
+  }
+  .newNameRow{display:flex; gap:8px; margin-top:14px;}
+  .newNameRow input{
+    flex:1; padding:11px 12px; border-radius:10px; border:1px solid var(--line);
+    font-size:0.95rem; font-family:'Inter',sans-serif;
+  }
+  .newNameRow button{margin-top:0; width:auto; padding:11px 16px;}
+
+  /* ---------- App ---------- */
+  #app{display:none;}
+  .top{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:22px;}
+  .whoami{font-size:0.8rem; color:var(--ink-soft); text-align:right;}
+  .whoami button{background:none; border:none; text-decoration:underline; color:var(--ink-soft); font-size:0.75rem; cursor:pointer; padding:0; margin-top:4px;}
+
+  .card{
+    background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
+    padding:20px; margin-bottom:16px;
+  }
+
+  .dateToggle{display:flex; gap:8px; margin-top:14px;}
+  .dateToggle button{
+    flex:1; padding:9px; border-radius:10px; border:1px solid var(--line);
+    background:#fff; font-family:'Inter',sans-serif; font-weight:600; font-size:0.88rem; cursor:pointer;
+  }
+  .dateToggle button.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+
+  .today .repsRow{display:flex; align-items:center; gap:12px; margin-top:12px;}
+  .today input[type=number]{
+    width:80px; padding:10px; border-radius:10px; border:1px solid var(--line);
+    font-size:1.1rem; text-align:center; font-family:'Inter',sans-serif;
+  }
+  .today .btn{margin-top:0; flex:1;}
+  .today .btn.done{background:var(--done);}
+  .status{font-size:0.85rem; color:var(--ink-soft); margin-top:10px;}
+  .todayHint{font-size:0.78rem; color:var(--ink-soft); margin-top:8px; line-height:1.4;}
+
+  .stats{display:flex; gap:12px;}
+  .stat{flex:1; text-align:center;}
+  .stat .num{font-family:'Fraunces',serif; font-size:1.6rem; font-weight:700;}
+  .stat .lbl{font-size:0.72rem; color:var(--ink-soft); margin-top:2px;}
+
+  .milestone{
+    background:linear-gradient(135deg, var(--gold), #F0C878);
+    color:#3a2c0f; padding:14px 16px; border-radius:12px; font-size:0.9rem;
+    display:none; margin-bottom:16px; font-weight:600;
+  }
+
+  /* ---------- Dagoverzicht ---------- */
+  .day-block{padding:10px 0; border-bottom:1px solid var(--line);}
+  .day-block:last-child{border-bottom:none;}
+  .day-block .head{display:flex; justify-content:space-between; font-size:0.85rem; font-weight:600;}
+  .day-block .who{font-size:0.78rem; color:var(--ink-soft); margin-top:4px;}
+  .day-block .formula{font-size:0.78rem; color:var(--ink-soft); margin-top:4px; font-variant-numeric:tabular-nums;}
+  .day-block .km{color:var(--ink); font-weight:700;}
+
+  /* ---------- World journey ---------- */
+  .journey-current{
+    display:flex; align-items:baseline; justify-content:space-between; margin-bottom:6px;
+  }
+  .journey-current .place{font-family:'Fraunces',serif; font-size:1.15rem; font-weight:600;}
+  .journey-current .km{font-size:0.8rem; color:var(--ink-soft);}
+  .journey-note{font-size:0.82rem; color:var(--ink-soft); margin-bottom:14px;}
+
+  .progress-outer{
+    height:10px; background:#E4E9DC; border-radius:6px; overflow:hidden; position:relative;
+  }
+  .progress-inner{
+    height:100%; border-radius:6px;
+    background:linear-gradient(90deg,
+      var(--europa) 0%, var(--europa) 10%,
+      var(--afrika) 10%, var(--afrika) 24%,
+      var(--antarctica) 24%, var(--antarctica) 44%,
+      var(--zuidamerika) 44%, var(--zuidamerika) 68%,
+      var(--noordamerika) 68%, var(--noordamerika) 100%);
+    background-size:400% 100%;
+    width:0%; transition:width .4s ease;
+  }
+
+  .route-list{margin-top:16px; display:flex; flex-direction:column; max-height:260px; overflow-y:auto;}
+  .route-item{
+    display:flex; align-items:flex-start; gap:10px; padding:7px 0;
+    font-size:0.85rem;
+  }
+  .route-item .dot{
+    width:11px; height:11px; border-radius:50%; margin-top:3px; flex-shrink:0;
+    border:2px solid var(--line); background:#fff;
+  }
+  .route-item.passed .dot{background:var(--ink); border-color:var(--ink);}
+  .route-item.current .dot{
+    background:var(--gold); border-color:var(--gold);
+    box-shadow:0 0 0 4px rgba(221,161,59,0.25);
+  }
+  .route-item .name{flex:1;}
+  .route-item.passed .name{color:var(--ink-soft); text-decoration:line-through; text-decoration-color:var(--line);}
+  .route-item.current .name{font-weight:700;}
+  .route-item .dist{color:var(--ink-soft); font-variant-numeric:tabular-nums;}
+  .region-tag{
+    font-size:0.65rem; text-transform:uppercase; letter-spacing:0.04em;
+    padding:1px 6px; border-radius:5px; margin-left:6px; color:#fff; vertical-align:middle;
+  }
+  .region-tag.Europa{background:var(--europa);}
+  .region-tag.Afrika{background:var(--afrika);}
+  .region-tag.Antarctica{background:var(--antarctica); color:#123;}
+  .region-tag.ZuidAmerika{background:var(--zuidamerika);}
+  .region-tag.NoordAmerika{background:var(--noordamerika);}
+
+  footer{text-align:center; color:var(--ink-soft); font-size:0.75rem; margin-top:30px;}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="card">
+    <h1>Samen de wereld rond</h1>
+    <p class="tagline">Jullie besloten push-up-logboek.</p>
+    <input type="password" id="pwInput" placeholder="Wachtwoord">
+    <button onclick="tryPassword()">Naar binnen</button>
+    <div class="error" id="pwError">Dat is 'm niet.</div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div id="app">
+    <div class="top">
+      <div>
+        <h1>Samen de wereld rond</h1>
+        <p class="tagline">Hoe meer mensen meedoen, hoe sneller jullie vooruit gaan.</p>
+      </div>
+      <div class="whoami">
+        <div id="whoamiName"></div>
+        <button onclick="switchPerson()">wissel</button>
+      </div>
+    </div>
+
+    <div class="milestone" id="milestone"></div>
+
+    <div class="card today">
+      <h3>Push-ups loggen</h3>
+      <div class="dateToggle">
+        <button id="btnToday" class="active" onclick="setOffset(0)">Vandaag</button>
+        <button id="btnYesterday" onclick="setOffset(1)">Gisteren</button>
+      </div>
+      <div class="repsRow">
+        <input type="number" id="repsInput" value="10" min="1">
+        <button class="btn" id="logBtn" onclick="logSelected()">Ik heb gepompt</button>
+      </div>
+      <div class="status" id="todayStatus"></div>
+      <div class="todayHint">Km = (aantal mensen dat die dag pompte) × (som van alle reps die dag). Niemand gelogd = multiplier 1. Voor "gisteren" heb je tot vandaag de tijd.</div>
+    </div>
+
+    <div class="card">
+      <div class="stats">
+        <div class="stat">
+          <div class="num" id="myStreak">0</div>
+          <div class="lbl">jouw streak</div>
+        </div>
+        <div class="stat">
+          <div class="num" id="totalKm">0</div>
+          <div class="lbl">km afgelegd</div>
+        </div>
+        <div class="stat">
+          <div class="num" id="totalReps">0</div>
+          <div class="lbl">reps ooit</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Dagoverzicht</h3>
+      <div id="dayBlocks"></div>
+    </div>
+
+    <div class="card">
+      <h3>De route</h3>
+      <div class="journey-current" style="margin-top:12px;">
+        <div class="place" id="currentPlace">Nordkapp, Noorwegen</div>
+        <div class="km" id="kmToNext"></div>
+      </div>
+      <div class="journey-note" id="journeyNote"></div>
+      <div class="progress-outer"><div class="progress-inner" id="progressInner"></div></div>
+      <div class="route-list" id="routeList"></div>
+    </div>
+
+    <footer>Jullie eigen, besloten logboek — niemand anders ziet dit.<br>Route: Nordkaap → Zuidpool → Zuid-Amerika → Noord-Amerika → terug naar Nordkapp, ± <span id="routeTotalLabel"></span> km.</footer>
+  </div>
+</div>
+
+<script>
+/* ============ CONFIGURATIE — pas dit aan ============ */
+const API_URL = 'https://script.google.com/macros/s/AKfycbzI5yeTaoolwROQW1jo_PI_fykQU49nAFVS32rvaSD1_ComRn4YAkyxUgy15OvOJihs0g/exec';
+const APP_PASSWORD = '75'; // moet gelijk zijn aan SECRET in Code.gs
+
+/* De wereldroute: een volledige polaire rondreis, Nordkaap terug tot Nordkapp.
+   Bewust eerst noord-zuid door Europa en Afrika (niet meteen weken oceaan),
+   dan Antarctica, dan omhoog door Zuid- en Noord-Amerika en over de
+   Noordpool terug naar het vertrekpunt. km = cumulatieve afstand vanaf start.
+   Voeg gerust extra tussenstops toe of verkort de route — elk punt is
+   gewoon {name, km, region}. */
+const ROUTE = [
+  { name: 'Nordkapp, Noorwegen', km: 0, region: 'Europa' },
+  { name: 'Oslo, Noorwegen', km: 1550, region: 'Europa' },
+  { name: 'Kopenhagen, Denemarken', km: 1900, region: 'Europa' },
+  { name: 'Berlijn, Duitsland', km: 2200, region: 'Europa' },
+  { name: 'Wenen, Oostenrijk', km: 2600, region: 'Europa' },
+  { name: 'Rome, Italië', km: 3200, region: 'Europa' },
+  { name: 'Valletta, Malta', km: 3500, region: 'Europa' },
+  { name: 'Tripoli, Libië', km: 3900, region: 'Afrika' },
+  { name: 'Agadez, Niger', km: 5200, region: 'Afrika' },
+  { name: 'Lagos, Nigeria', km: 6100, region: 'Afrika' },
+  { name: 'Kinshasa, DR Congo', km: 7100, region: 'Afrika' },
+  { name: 'Lusaka, Zambia', km: 7900, region: 'Afrika' },
+  { name: 'Johannesburg, Zuid-Afrika', km: 8700, region: 'Afrika' },
+  { name: 'Kaap Agulhas, Zuid-Afrika', km: 9400, region: 'Afrika' },
+  { name: 'Kust van Antarctica (Koningin Maudland)', km: 13400, region: 'Antarctica' },
+  { name: 'Zuidpool (Amundsen-Scott)', km: 14700, region: 'Antarctica' },
+  { name: 'Ushuaia, Argentinië', km: 17500, region: 'ZuidAmerika' },
+  { name: 'Buenos Aires, Argentinië', km: 19700, region: 'ZuidAmerika' },
+  { name: 'São Paulo, Brazilië', km: 20700, region: 'ZuidAmerika' },
+  { name: 'Brasília, Brazilië', km: 21700, region: 'ZuidAmerika' },
+  { name: 'Belém, Brazilië', km: 23000, region: 'ZuidAmerika' },
+  { name: 'Caracas, Venezuela', km: 24800, region: 'ZuidAmerika' },
+  { name: 'Bogotá, Colombia', km: 25400, region: 'ZuidAmerika' },
+  { name: 'Ciudad de Panamá, Panama', km: 26300, region: 'NoordAmerika' },
+  { name: 'Ciudad de México, Mexico', km: 28000, region: 'NoordAmerika' },
+  { name: 'Denver, Verenigde Staten', km: 29800, region: 'NoordAmerika' },
+  { name: 'Winnipeg, Canada', km: 31300, region: 'NoordAmerika' },
+  { name: 'Yellowknife, Canada', km: 32700, region: 'NoordAmerika' },
+  { name: 'Alert, Canada', km: 34700, region: 'NoordAmerika' },
+  { name: 'Spitsbergen, Noorwegen', km: 37200, region: 'Europa' },
+  { name: 'Terug in Nordkapp — rond!', km: 39700, region: 'Europa' }
+];
+const ROUTE_TOTAL = ROUTE[ROUTE.length - 1].km;
+/* ===================================================== */
+
+let me = localStorage.getItem('pushup_me') || null;
+let key = null;
+let logOffset = 0; // 0 = vandaag, 1 = gisteren
+let cachedEntries = [];
+
+document.getElementById('routeTotalLabel').textContent = ROUTE_TOTAL.toLocaleString('nl-BE');
+
+function dateStrOffset(offsetDays){
+  const d = new Date();
+  d.setDate(d.getDate() - offsetDays);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function tryPassword(){
+  const val = document.getElementById('pwInput').value;
+  if(val !== APP_PASSWORD){
+    document.getElementById('pwError').style.display = 'block';
+    return;
+  }
+  key = val;
+  sessionStorage.setItem('pushup_key', val);
+  document.getElementById('gate').style.display = 'none';
+  boot();
+}
+
+if(sessionStorage.getItem('pushup_key') === APP_PASSWORD){
+  key = APP_PASSWORD;
+}
+
+function switchPerson(){
+  localStorage.removeItem('pushup_me');
+  me = null;
+  boot();
+}
+
+function pickPerson(p){
+  me = p;
+  localStorage.setItem('pushup_me', p);
+  boot();
+}
+
+async function apiGet(){
+  const res = await fetch(API_URL + '?key=' + encodeURIComponent(key));
+  return res.json();
+}
+
+async function apiPost(payload){
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'text/plain;charset=utf-8'},
+    body: JSON.stringify(Object.assign({key}, payload))
+  });
+  return res.json();
+}
+
+async function boot(){
+  if(!key){
+    document.getElementById('gate').style.display = 'flex';
+    return;
+  }
+  document.getElementById('gate').style.display = 'none';
+
+  if(!me){
+    await renderNamePicker();
+    return;
+  }
+  const picker = document.getElementById('namePick');
+  if(picker) picker.remove();
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('whoamiName').textContent = 'Ingelogd als ' + me;
+
+  await refresh();
+}
+
+async function renderNamePicker(){
+  document.getElementById('app').style.display = 'none';
+  let data;
+  try{ data = await apiGet(); }catch(e){ data = { entries: [] }; }
+  const entries = (data && data.entries) || [];
+  const names = [...new Set(entries.map(e => e.person))].sort();
+
+  let picker = document.getElementById('namePick');
+  if(!picker){
+    picker = document.createElement('div');
+    picker.id = 'namePick';
+    picker.className = 'card';
+    document.querySelector('.wrap').prepend(picker);
+  }
+  picker.innerHTML =
+    '<h3>Wie ben jij?</h3>' +
+    '<div class="namePick-row" id="nameBtnRow"></div>' +
+    '<div class="newNameRow">' +
+      '<input type="text" id="newNameInput" placeholder="Nieuwe naam">' +
+      '<button class="btn" onclick="addNewName()">Start</button>' +
+    '</div>';
+  const row = document.getElementById('nameBtnRow');
+  names.forEach(n => {
+    const b = document.createElement('button');
+    b.className = 'nameBtn';
+    b.textContent = n;
+    b.onclick = () => pickPerson(n);
+    row.appendChild(b);
+  });
+}
+
+function addNewName(){
+  const v = document.getElementById('newNameInput').value.trim();
+  if(!v) return;
+  pickPerson(v);
+}
+
+function setOffset(offset){
+  logOffset = offset;
+  document.getElementById('btnToday').classList.toggle('active', offset === 0);
+  document.getElementById('btnYesterday').classList.toggle('active', offset === 1);
+  updateLogFormState();
+}
+
+function updateLogFormState(){
+  const ds = dateStrOffset(logOffset);
+  const mine = cachedEntries.filter(e => e.person === me && e.date === ds);
+  if(mine.length){
+    document.getElementById('repsInput').value = mine[0].reps;
+    document.getElementById('logBtn').classList.add('done');
+    document.getElementById('logBtn').textContent = 'Aangepast, nog eens opslaan';
+    document.getElementById('todayStatus').textContent = 'Al gelogd voor ' + (logOffset === 0 ? 'vandaag' : 'gisteren') + ' — mag alsnog aanpassen.';
+  } else {
+    document.getElementById('repsInput').value = 10;
+    document.getElementById('logBtn').classList.remove('done');
+    document.getElementById('logBtn').textContent = 'Ik heb gepompt';
+    document.getElementById('todayStatus').textContent = '';
+  }
+}
+
+function computeStreak(entriesForPerson, uptoDate){
+  let streak = 0;
+  let d = new Date(uptoDate);
+  const dates = new Set(entriesForPerson.map(e => e.date));
+  while(true){
+    const ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    if(dates.has(ds)){
+      streak++;
+      d.setDate(d.getDate() - 1);
+    } else break;
+  }
+  return streak;
+}
+
+// Voor een dag: multiplier = aantal deelnemers die dag (of 1 als niemand logde), km = multiplier x som reps
+function computeDayStats(entries, dateStr){
+  const dayEntries = entries.filter(e => e.date === dateStr);
+  const n = dayEntries.length;
+  const s = dayEntries.reduce((sum, e) => sum + (Number(e.reps) || 0), 0);
+  const multiplier = n > 0 ? n : 1;
+  return { persons: dayEntries, n, s, multiplier, km: multiplier * s };
+}
+
+function computeWorldKm(entries){
+  const dates = [...new Set(entries.map(e => e.date))];
+  let km = 0;
+  dates.forEach(d => { km += computeDayStats(entries, d).km; });
+  return Math.min(km, ROUTE_TOTAL);
+}
+
+function currentWaypointIndex(km){
+  let idx = 0;
+  for(let i = 0; i < ROUTE.length; i++){
+    if(ROUTE[i].km <= km) idx = i;
+  }
+  return idx;
+}
+
+function renderDayBlocks(entries){
+  const container = document.getElementById('dayBlocks');
+  container.innerHTML = '';
+  [0, 1].forEach(offset => {
+    const ds = dateStrOffset(offset);
+    const stats = computeDayStats(entries, ds);
+    const label = offset === 0 ? 'Vandaag' : 'Gisteren';
+    const block = document.createElement('div');
+    block.className = 'day-block';
+    const who = stats.persons.map(p => p.person + ' (' + p.reps + ')').join(', ') || 'nog niemand';
+    block.innerHTML =
+      '<div class="head"><span>' + label + '</span><span class="km">' + stats.km + ' km</span></div>' +
+      '<div class="who">' + who + '</div>' +
+      '<div class="formula">' + stats.multiplier + ' × ' + stats.s + ' = ' + stats.km + ' km' + (offset === 1 ? ' (nog aan te vullen tot vandaag)' : '') + '</div>';
+    container.appendChild(block);
+  });
+}
+
+function renderJourney(km){
+  const idx = currentWaypointIndex(km);
+  const current = ROUTE[idx];
+  const next = ROUTE[idx + 1];
+
+  document.getElementById('currentPlace').textContent =
+    km >= ROUTE_TOTAL ? 'Aangekomen: helemaal rond!' : current.name;
+
+  if(next && km < ROUTE_TOTAL){
+    document.getElementById('kmToNext').textContent = (next.km - km) + ' km tot ' + next.name.split(',')[0];
+  } else {
+    document.getElementById('kmToNext').textContent = '';
+  }
+
+  const noteEl = document.getElementById('journeyNote');
+  if(km >= ROUTE_TOTAL){
+    noteEl.textContent = 'Jullie zijn de hele wereld rond geweest, van de Noordkaap terug tot de Noordkaap. 🎉';
+  } else if(next){
+    const span = next.km - current.km;
+    const into = km - current.km;
+    const pct = span > 0 ? Math.round((into/span)*100) : 0;
+    noteEl.textContent = 'Onderweg van ' + current.name.split(',')[0] + ' naar ' + next.name.split(',')[0] + ' — ' + pct + '% van dat stuk.';
+  }
+
+  document.getElementById('progressInner').style.width = Math.min(100, (km/ROUTE_TOTAL)*100) + '%';
+  document.getElementById('totalKm').textContent = km;
+
+  const listEl = document.getElementById('routeList');
+  listEl.innerHTML = '';
+  ROUTE.forEach((wp, i) => {
+    const state = i < idx ? 'passed' : (i === idx ? 'current' : '');
+    const row = document.createElement('div');
+    row.className = 'route-item ' + state;
+    row.innerHTML =
+      '<div class="dot"></div>' +
+      '<div class="name">' + wp.name + '<span class="region-tag ' + wp.region + '">' + wp.region + '</span></div>' +
+      '<div class="dist">' + wp.km.toLocaleString('nl-BE') + ' km</div>';
+    listEl.appendChild(row);
+  });
+
+  return idx;
+}
+
+let lastCelebratedIdx = Number(localStorage.getItem('pushup_last_celebrated') || -1);
+
+async function refresh(){
+  document.getElementById('todayStatus').textContent = 'Laden...';
+  let data;
+  try{
+    data = await apiGet();
+  }catch(err){
+    document.getElementById('todayStatus').textContent = 'Kon geen verbinding maken met het logboek.';
+    return;
+  }
+  if(data.error){
+    document.getElementById('todayStatus').textContent = 'Fout: ' + data.error;
+    return;
+  }
+  const entries = data.entries || [];
+  cachedEntries = entries;
+  const today = dateStrOffset(0);
+
+  const mine = entries.filter(e => e.person === me);
+  document.getElementById('myStreak').textContent = computeStreak(mine, today);
+
+  const total = entries.reduce((s,e) => s + (Number(e.reps)||0), 0);
+  document.getElementById('totalReps').textContent = total;
+
+  updateLogFormState();
+  renderDayBlocks(entries);
+
+  const km = computeWorldKm(entries);
+  const idx = renderJourney(km);
+
+  const milestoneEl = document.getElementById('milestone');
+  if(idx > lastCelebratedIdx && idx > 0){
+    milestoneEl.style.display = 'block';
+    milestoneEl.textContent = 'Aangekomen in ' + ROUTE[idx].name + '!';
+    lastCelebratedIdx = idx;
+    localStorage.setItem('pushup_last_celebrated', String(idx));
+  } else {
+    milestoneEl.style.display = 'none';
+  }
+}
+
+async function logSelected(){
+  const reps = Number(document.getElementById('repsInput').value) || 10;
+  const ds = dateStrOffset(logOffset);
+  document.getElementById('logBtn').disabled = true;
+  document.getElementById('todayStatus').textContent = 'Opslaan...';
+  try{
+    await apiPost({ person: me, date: ds, reps });
+    await refresh();
+  }catch(err){
+    document.getElementById('todayStatus').textContent = 'Opslaan mislukt, probeer opnieuw.';
+  }
+  document.getElementById('logBtn').disabled = false;
+}
+
+boot();
+</script>
+</body>
+</html>
