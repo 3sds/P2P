@@ -6,6 +6,7 @@
 <title>Samen de wereld rond</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%231a0f2e'/%3E%3Ccircle cx='256' cy='140' r='80' fill='%23fff' stroke='%23ff6b6b' stroke-width='8'/%3E%3Cpath d='M256 70 L230 90 L256 110 L282 90 Z' fill='%23ff0000'/%3E%3Ccircle cx='235' cy='130' r='8' fill='%23000'/%3E%3Ccircle cx='277' cy='130' r='8' fill='%23000'/%3E%3Cpath d='M256 155 L215 170 L256 180 L297 170 Z' fill='%23ffa500'/%3E%3Crect x='170' y='220' width='172' height='200' rx='86' fill='%238B4513'/%3E%3Ccircle cx='190' cy='260' r='7' fill='%23F5DEB3'/%3E%3Ccircle cx='240' cy='280' r='7' fill='%23F5DEB3'/%3E%3Ccircle cx='272' cy='275' r='7' fill='%23F5DEB3'/%3E%3Ccircle cx='310' cy='290' r='7' fill='%23F5DEB3'/%3E%3Ccircle cx='210' cy='320' r='7' fill='%23F5DEB3'/%3E%3Ccircle cx='280' cy='340' r='7' fill='%23F5DEB3'/%3E%3Ccircle cx='256' cy='360' r='7' fill='%23F5DEB3'/%3E%3C/svg%3E">
 <style>
   :root{
     --bg:#EEF1EA;
@@ -130,6 +131,7 @@
   }
   .journey-current .place{font-family:'Fraunces',serif; font-size:1.15rem; font-weight:600;}
   .journey-current .km{font-size:0.8rem; color:var(--ink-soft);}
+  .journey-fact{font-size:0.8rem; color:var(--ink); font-style:italic; margin-bottom:6px; line-height:1.4;}
   .journey-note{font-size:0.82rem; color:var(--ink-soft); margin-bottom:14px;}
 
   .progress-outer{
@@ -176,6 +178,8 @@
   .region-tag.NoordAmerika{background:var(--noordamerika);}
 
   footer{text-align:center; color:var(--ink-soft); font-size:0.75rem; margin-top:30px;}
+  .signature{display:flex; justify-content:center; margin-top:10px; opacity:0.45;}
+  .signature svg{display:block;}
 </style>
 </head>
 <body>
@@ -183,7 +187,7 @@
 <div id="gate">
   <div class="card">
     <h1>Samen de wereld rond</h1>
-    <p class="tagline">Jullie besloten push-up-logboek.</p>
+    <p class="tagline"></p>
     <input type="password" id="pwInput" placeholder="Wachtwoord">
     <button onclick="tryPassword()">Naar binnen</button>
     <div class="error" id="pwError">Dat is 'm niet.</div>
@@ -206,7 +210,7 @@
     <div class="milestone" id="milestone"></div>
 
     <div class="card today">
-      <h3>Push-ups loggen</h3>
+      <h3>Loggen</h3>
       <div class="dateToggle">
         <button id="btnToday" class="active" onclick="setOffset(0)">Vandaag</button>
         <button id="btnYesterday" onclick="setOffset(1)">Gisteren</button>
@@ -216,7 +220,7 @@
         <button class="btn" id="logBtn" onclick="logSelected()">Ik heb gepompt</button>
       </div>
       <div class="status" id="todayStatus"></div>
-      <div class="todayHint">Km = (aantal mensen dat die dag pompte) × (som van alle reps die dag). Niemand gelogd = multiplier 1. Voor "gisteren" heb je tot vandaag de tijd.</div>
+      <div class="todayHint">Km = (aantal mensen dat die dag pompte) × (som van alle reps die dag). Voor "gisteren" heb je tot vandaag de tijd.</div>
     </div>
 
     <div class="card">
@@ -247,12 +251,31 @@
         <div class="place" id="currentPlace">Nordkapp, Noorwegen</div>
         <div class="km" id="kmToNext"></div>
       </div>
+      <div class="journey-fact" id="journeyFact"></div>
       <div class="journey-note" id="journeyNote"></div>
       <div class="progress-outer"><div class="progress-inner" id="progressInner"></div></div>
       <div class="route-list" id="routeList"></div>
     </div>
 
-    <footer>Jullie eigen, besloten logboek — niemand anders ziet dit.<br>Route: Nordkaap → Zuidpool → Zuid-Amerika → Noord-Amerika → terug naar Nordkapp, ± <span id="routeTotalLabel"></span> km.</footer>
+    <footer><br>Route: Nordkaap → Zuidpool → Zuid-Amerika → Noord-Amerika → terug naar Nordkapp, ± <span id="routeTotalLabel"></span> km.
+      <div class="signature">
+        <svg viewBox="130 40 260 400" width="16" height="25">
+          <circle cx="256" cy="140" r="80" fill="#fff" stroke="#ff6b6b" stroke-width="8"/>
+          <path d="M256 70 L230 90 L256 110 L282 90 Z" fill="#ff0000"/>
+          <circle cx="235" cy="130" r="8" fill="#000"/>
+          <circle cx="277" cy="130" r="8" fill="#000"/>
+          <path d="M256 155 L215 170 L256 180 L297 170 Z" fill="#ffa500"/>
+          <rect x="170" y="220" width="172" height="200" rx="86" fill="#8B4513"/>
+          <circle cx="190" cy="260" r="7" fill="#F5DEB3"/>
+          <circle cx="240" cy="280" r="7" fill="#F5DEB3"/>
+          <circle cx="272" cy="275" r="7" fill="#F5DEB3"/>
+          <circle cx="310" cy="290" r="7" fill="#F5DEB3"/>
+          <circle cx="210" cy="320" r="7" fill="#F5DEB3"/>
+          <circle cx="280" cy="340" r="7" fill="#F5DEB3"/>
+          <circle cx="256" cy="360" r="7" fill="#F5DEB3"/>
+        </svg>
+      </div>
+    </footer>
   </div>
 </div>
 
@@ -268,37 +291,37 @@ const APP_PASSWORD = '75'; // moet gelijk zijn aan SECRET in Code.gs
    Voeg gerust extra tussenstops toe of verkort de route — elk punt is
    gewoon {name, km, region}. */
 const ROUTE = [
-  { name: 'Nordkapp, Noorwegen', km: 0, region: 'Europa' },
-  { name: 'Oslo, Noorwegen', km: 1550, region: 'Europa' },
-  { name: 'Kopenhagen, Denemarken', km: 1900, region: 'Europa' },
-  { name: 'Berlijn, Duitsland', km: 2200, region: 'Europa' },
-  { name: 'Wenen, Oostenrijk', km: 2600, region: 'Europa' },
-  { name: 'Rome, Italië', km: 3200, region: 'Europa' },
-  { name: 'Valletta, Malta', km: 3500, region: 'Europa' },
-  { name: 'Tripoli, Libië', km: 3900, region: 'Afrika' },
-  { name: 'Agadez, Niger', km: 5200, region: 'Afrika' },
-  { name: 'Lagos, Nigeria', km: 6100, region: 'Afrika' },
-  { name: 'Kinshasa, DR Congo', km: 7100, region: 'Afrika' },
-  { name: 'Lusaka, Zambia', km: 7900, region: 'Afrika' },
-  { name: 'Johannesburg, Zuid-Afrika', km: 8700, region: 'Afrika' },
-  { name: 'Kaap Agulhas, Zuid-Afrika', km: 9400, region: 'Afrika' },
-  { name: 'Kust van Antarctica (Koningin Maudland)', km: 13400, region: 'Antarctica' },
-  { name: 'Zuidpool (Amundsen-Scott)', km: 14700, region: 'Antarctica' },
-  { name: 'Ushuaia, Argentinië', km: 17500, region: 'ZuidAmerika' },
-  { name: 'Buenos Aires, Argentinië', km: 19700, region: 'ZuidAmerika' },
-  { name: 'São Paulo, Brazilië', km: 20700, region: 'ZuidAmerika' },
-  { name: 'Brasília, Brazilië', km: 21700, region: 'ZuidAmerika' },
-  { name: 'Belém, Brazilië', km: 23000, region: 'ZuidAmerika' },
-  { name: 'Caracas, Venezuela', km: 24800, region: 'ZuidAmerika' },
-  { name: 'Bogotá, Colombia', km: 25400, region: 'ZuidAmerika' },
-  { name: 'Ciudad de Panamá, Panama', km: 26300, region: 'NoordAmerika' },
-  { name: 'Ciudad de México, Mexico', km: 28000, region: 'NoordAmerika' },
-  { name: 'Denver, Verenigde Staten', km: 29800, region: 'NoordAmerika' },
-  { name: 'Winnipeg, Canada', km: 31300, region: 'NoordAmerika' },
-  { name: 'Yellowknife, Canada', km: 32700, region: 'NoordAmerika' },
-  { name: 'Alert, Canada', km: 34700, region: 'NoordAmerika' },
-  { name: 'Spitsbergen, Noorwegen', km: 37200, region: 'Europa' },
-  { name: 'Terug in Nordkapp — rond!', km: 39700, region: 'Europa' }
+  { name: 'Nordkapp, Noorwegen', km: 0, region: 'Europa', fact: 'Het noordelijkste punt van het Europese vaste continent, met een klif van 307 meter boven de Barentszzee.' },
+  { name: 'Oslo, Noorwegen', km: 1550, region: 'Europa', fact: 'Oslo is bijna half omringd door bos — een van de groenste hoofdsteden van Europa.' },
+  { name: 'Kopenhagen, Denemarken', km: 1900, region: 'Europa', fact: 'Kopenhagen heeft meer fietsen dan inwoners.' },
+  { name: 'Berlijn, Duitsland', km: 2200, region: 'Europa', fact: 'Berlijn telt meer bruggen dan Venetië.' },
+  { name: 'Wenen, Oostenrijk', km: 2600, region: 'Europa', fact: 'Wenen wordt al jaren op rij verkozen tot een van de meest leefbare steden ter wereld.' },
+  { name: 'Rome, Italië', km: 3200, region: 'Europa', fact: 'Rome staat bekend als "de Eeuwige Stad" en is gebouwd op zeven heuvels.' },
+  { name: 'Valletta, Malta', km: 3500, region: 'Europa', fact: 'Valletta is met nog geen 6.000 inwoners binnen de muren de kleinste hoofdstad van de EU.' },
+  { name: 'Tripoli, Libië', km: 3900, region: 'Afrika', fact: 'Tripoli ligt precies op de grens tussen de Middellandse Zee en de Sahara.' },
+  { name: 'Agadez, Niger', km: 5200, region: 'Afrika', fact: 'Agadez wordt "de poort van de woestijn" genoemd, al eeuwen een knooppunt voor karavanen.' },
+  { name: 'Lagos, Nigeria', km: 6100, region: 'Afrika', fact: 'Met ruim 15 miljoen inwoners is Lagos de grootste stad van Afrika.' },
+  { name: 'Kinshasa, DR Congo', km: 7100, region: 'Afrika', fact: 'Kinshasa en Brazzaville zijn de dichtst bij elkaar gelegen hoofdsteden van twee landen wereldwijd.' },
+  { name: 'Lusaka, Zambia', km: 7900, region: 'Afrika', fact: 'Lusaka ligt op zowat 1.300 meter hoogte, wat het klimaat er opvallend mild maakt.' },
+  { name: 'Johannesburg, Zuid-Afrika', km: 8700, region: 'Afrika', fact: 'Johannesburg is de grootste stad ter wereld die niet aan een rivier, meer of kust ligt.' },
+  { name: 'Kaap Agulhas, Zuid-Afrika', km: 9400, region: 'Afrika', fact: 'Niet Kaapstad, maar hier ligt het echte zuidelijkste punt van Afrika.' },
+  { name: 'Kust van Antarctica (Koningin Maudland)', km: 13400, region: 'Antarctica', fact: 'Antarctica is het droogste, koudste én winderigste continent op aarde.' },
+  { name: 'Zuidpool (Amundsen-Scott)', km: 14700, region: 'Antarctica', fact: 'Op de Zuidpool zelf gaat de zon maar twee keer per jaar op en onder.' },
+  { name: 'Ushuaia, Argentinië', km: 17500, region: 'ZuidAmerika', fact: 'Ushuaia noemt zichzelf "el fin del mundo" — het einde van de wereld.' },
+  { name: 'Buenos Aires, Argentinië', km: 19700, region: 'ZuidAmerika', fact: 'Buenos Aires heeft met de Avenida 9 de Julio een van de breedste avenues ter wereld.' },
+  { name: 'São Paulo, Brazilië', km: 20700, region: 'ZuidAmerika', fact: 'São Paulo is de grootste stad van het volledige zuidelijk halfrond.' },
+  { name: 'Brasília, Brazilië', km: 21700, region: 'ZuidAmerika', fact: 'Brasília werd in nog geen vier jaar helemaal vanaf niets gebouwd, met een plattegrond in de vorm van een vliegtuig.' },
+  { name: 'Belém, Brazilië', km: 23000, region: 'ZuidAmerika', fact: 'Belém ligt aan de mond van de Amazone en wordt "de poort van de Amazone" genoemd.' },
+  { name: 'Caracas, Venezuela', km: 24800, region: 'ZuidAmerika', fact: 'Caracas ligt verscholen in een vallei, op meer dan 900 meter hoogte tussen bergen en Caribische kust.' },
+  { name: 'Bogotá, Colombia', km: 25400, region: 'ZuidAmerika', fact: 'Op ruim 2.600 meter hoogte is Bogotá een van de hoogst gelegen hoofdsteden ter wereld.' },
+  { name: 'Ciudad de Panamá, Panama', km: 26300, region: 'NoordAmerika', fact: 'Vanuit Panama-Stad kan je de zon zowel over de Atlantische als over de Grote Oceaan zien opkomen.' },
+  { name: 'Ciudad de México, Mexico', km: 28000, region: 'NoordAmerika', fact: 'Mexico-Stad zakt elk jaar een paar centimeter, omdat het op een opgevuld meer gebouwd is.' },
+  { name: 'Denver, Verenigde Staten', km: 29800, region: 'NoordAmerika', fact: 'Denver noemt zichzelf de "Mile High City" — precies 5.280 voet, of 1.609 meter, boven zeeniveau.' },
+  { name: 'Winnipeg, Canada', km: 31300, region: 'NoordAmerika', fact: 'Winnipeg ligt op de samenvloeiing van de Red en de Assiniboine River, al eeuwen een handelsknooppunt.' },
+  { name: 'Yellowknife, Canada', km: 32700, region: 'NoordAmerika', fact: 'Yellowknife is een van de beste plekken op aarde om het noorderlicht te zien.' },
+  { name: 'Alert, Canada', km: 34700, region: 'NoordAmerika', fact: 'Alert is de noordelijkste permanent bewoonde plek op aarde.' },
+  { name: 'Spitsbergen, Noorwegen', km: 37200, region: 'Europa', fact: 'Op Spitsbergen wonen naar schatting meer ijsberen dan mensen.' },
+  { name: 'Terug in Nordkapp — rond!', km: 39700, region: 'Europa', fact: 'Van hier tot hier: jullie zijn de hele aardbol rond geweest, over beide polen.' }
 ];
 const ROUTE_TOTAL = ROUTE[ROUTE.length - 1].km;
 /* ===================================================== */
@@ -451,7 +474,7 @@ function computeStreak(entriesForPerson, uptoDate){
   return streak;
 }
 
-// Voor een dag: multiplier = aantal deelnemers die dag (of 1 als niemand logde), km = multiplier x som reps
+// Voor een dag: multiplier = aantal deelnemers die dag, km = multiplier x som reps
 function computeDayStats(entries, dateStr){
   const dayEntries = entries.filter(e => e.date === dateStr);
   const n = dayEntries.length;
@@ -500,6 +523,7 @@ function renderJourney(km){
 
   document.getElementById('currentPlace').textContent =
     km >= ROUTE_TOTAL ? 'Aangekomen: helemaal rond!' : current.name;
+  document.getElementById('journeyFact').textContent = current.fact || '';
 
   if(next && km < ROUTE_TOTAL){
     document.getElementById('kmToNext').textContent = (next.km - km) + ' km tot ' + next.name.split(',')[0];
@@ -570,7 +594,7 @@ async function refresh(){
   const milestoneEl = document.getElementById('milestone');
   if(idx > lastCelebratedIdx && idx > 0){
     milestoneEl.style.display = 'block';
-    milestoneEl.textContent = 'Aangekomen in ' + ROUTE[idx].name + '!';
+    milestoneEl.textContent = 'Aangekomen in ' + ROUTE[idx].name + '! ' + (ROUTE[idx].fact || '');
     lastCelebratedIdx = idx;
     localStorage.setItem('pushup_last_celebrated', String(idx));
   } else {
