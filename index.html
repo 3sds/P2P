@@ -151,6 +151,23 @@
   .day-block .km{color:var(--ink); font-weight:700;}
 
   /* ---------- World journey ---------- */
+  .globe-wrap{
+    display:flex; justify-content:center; margin-top:8px;
+  }
+  #globeSvg{width:210px; height:210px; max-width:100%;}
+  .globe-sphere{fill:#DCE9EC;}
+  .globe-graticule{fill:none; stroke:#B9CBCE; stroke-width:0.6;}
+  .globe-graticule.main{stroke:#93ACAF; stroke-width:0.9;}
+  .globe-dot-passed{fill:var(--ink); opacity:0.55;}
+  .globe-dot-future{fill:none; stroke:var(--ink-soft); stroke-width:0.8; opacity:0.5;}
+  .globe-dot-current{fill:var(--gold); stroke:#fff; stroke-width:1.4;}
+  .globe-path{fill:none; stroke:var(--gold); stroke-width:1; stroke-dasharray:2,2; opacity:0.7;}
+
+  .active-row{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:12px 0 4px;}
+  .active-row .avatar-mini{width:28px; height:28px;}
+  .active-empty{font-size:0.78rem; color:var(--ink-soft); text-align:center; margin:8px 0 4px;}
+  .active-label{font-size:0.7rem; color:var(--ink-soft); text-align:center; text-transform:uppercase; letter-spacing:0.04em; margin-top:4px;}
+
   .journey-current{
     display:flex; align-items:baseline; justify-content:space-between; margin-bottom:6px;
   }
@@ -278,6 +295,10 @@
 
     <div class="card">
       <h3>De route</h3>
+      <div class="globe-wrap">
+        <svg id="globeSvg" viewBox="-110 -110 220 220"></svg>
+      </div>
+      <div class="active-row" id="activeRow"></div>
       <div class="journey-current" style="margin-top:12px;">
         <div class="place" id="currentPlace">Nordkapp, Noorwegen</div>
         <div class="km" id="kmToNext"></div>
@@ -322,37 +343,37 @@ const APP_PASSWORD = '75'; // moet gelijk zijn aan SECRET in Code.gs
    Voeg gerust extra tussenstops toe of verkort de route — elk punt is
    gewoon {name, km, region}. */
 const ROUTE = [
-  { name: 'Nordkapp, Noorwegen', km: 0, region: 'Europa', fact: 'Het noordelijkste punt van het Europese vaste continent, met een klif van 307 meter boven de Barentszzee.' },
-  { name: 'Oslo, Noorwegen', km: 1550, region: 'Europa', fact: 'Oslo is bijna half omringd door bos — een van de groenste hoofdsteden van Europa.' },
-  { name: 'Kopenhagen, Denemarken', km: 1900, region: 'Europa', fact: 'Kopenhagen heeft meer fietsen dan inwoners.' },
-  { name: 'Berlijn, Duitsland', km: 2200, region: 'Europa', fact: 'Berlijn telt meer bruggen dan Venetië.' },
-  { name: 'Wenen, Oostenrijk', km: 2600, region: 'Europa', fact: 'Wenen wordt al jaren op rij verkozen tot een van de meest leefbare steden ter wereld.' },
-  { name: 'Rome, Italië', km: 3200, region: 'Europa', fact: 'Rome staat bekend als "de Eeuwige Stad" en is gebouwd op zeven heuvels.' },
-  { name: 'Valletta, Malta', km: 3500, region: 'Europa', fact: 'Valletta is met nog geen 6.000 inwoners binnen de muren de kleinste hoofdstad van de EU.' },
-  { name: 'Tripoli, Libië', km: 3900, region: 'Afrika', fact: 'Tripoli ligt precies op de grens tussen de Middellandse Zee en de Sahara.' },
-  { name: 'Agadez, Niger', km: 5200, region: 'Afrika', fact: 'Agadez wordt "de poort van de woestijn" genoemd, al eeuwen een knooppunt voor karavanen.' },
-  { name: 'Lagos, Nigeria', km: 6100, region: 'Afrika', fact: 'Met ruim 15 miljoen inwoners is Lagos de grootste stad van Afrika.' },
-  { name: 'Kinshasa, DR Congo', km: 7100, region: 'Afrika', fact: 'Kinshasa en Brazzaville zijn de dichtst bij elkaar gelegen hoofdsteden van twee landen wereldwijd.' },
-  { name: 'Lusaka, Zambia', km: 7900, region: 'Afrika', fact: 'Lusaka ligt op zowat 1.300 meter hoogte, wat het klimaat er opvallend mild maakt.' },
-  { name: 'Johannesburg, Zuid-Afrika', km: 8700, region: 'Afrika', fact: 'Johannesburg is de grootste stad ter wereld die niet aan een rivier, meer of kust ligt.' },
-  { name: 'Kaap Agulhas, Zuid-Afrika', km: 9400, region: 'Afrika', fact: 'Niet Kaapstad, maar hier ligt het echte zuidelijkste punt van Afrika.' },
-  { name: 'Kust van Antarctica (Koningin Maudland)', km: 13400, region: 'Antarctica', fact: 'Antarctica is het droogste, koudste én winderigste continent op aarde.' },
-  { name: 'Zuidpool (Amundsen-Scott)', km: 14700, region: 'Antarctica', fact: 'Op de Zuidpool zelf gaat de zon maar twee keer per jaar op en onder.' },
-  { name: 'Ushuaia, Argentinië', km: 17500, region: 'ZuidAmerika', fact: 'Ushuaia noemt zichzelf "el fin del mundo" — het einde van de wereld.' },
-  { name: 'Buenos Aires, Argentinië', km: 19700, region: 'ZuidAmerika', fact: 'Buenos Aires heeft met de Avenida 9 de Julio een van de breedste avenues ter wereld.' },
-  { name: 'São Paulo, Brazilië', km: 20700, region: 'ZuidAmerika', fact: 'São Paulo is de grootste stad van het volledige zuidelijk halfrond.' },
-  { name: 'Brasília, Brazilië', km: 21700, region: 'ZuidAmerika', fact: 'Brasília werd in nog geen vier jaar helemaal vanaf niets gebouwd, met een plattegrond in de vorm van een vliegtuig.' },
-  { name: 'Belém, Brazilië', km: 23000, region: 'ZuidAmerika', fact: 'Belém ligt aan de mond van de Amazone en wordt "de poort van de Amazone" genoemd.' },
-  { name: 'Caracas, Venezuela', km: 24800, region: 'ZuidAmerika', fact: 'Caracas ligt verscholen in een vallei, op meer dan 900 meter hoogte tussen bergen en Caribische kust.' },
-  { name: 'Bogotá, Colombia', km: 25400, region: 'ZuidAmerika', fact: 'Op ruim 2.600 meter hoogte is Bogotá een van de hoogst gelegen hoofdsteden ter wereld.' },
-  { name: 'Ciudad de Panamá, Panama', km: 26300, region: 'NoordAmerika', fact: 'Vanuit Panama-Stad kan je de zon zowel over de Atlantische als over de Grote Oceaan zien opkomen.' },
-  { name: 'Ciudad de México, Mexico', km: 28000, region: 'NoordAmerika', fact: 'Mexico-Stad zakt elk jaar een paar centimeter, omdat het op een opgevuld meer gebouwd is.' },
-  { name: 'Denver, Verenigde Staten', km: 29800, region: 'NoordAmerika', fact: 'Denver noemt zichzelf de "Mile High City" — precies 5.280 voet, of 1.609 meter, boven zeeniveau.' },
-  { name: 'Winnipeg, Canada', km: 31300, region: 'NoordAmerika', fact: 'Winnipeg ligt op de samenvloeiing van de Red en de Assiniboine River, al eeuwen een handelsknooppunt.' },
-  { name: 'Yellowknife, Canada', km: 32700, region: 'NoordAmerika', fact: 'Yellowknife is een van de beste plekken op aarde om het noorderlicht te zien.' },
-  { name: 'Alert, Canada', km: 34700, region: 'NoordAmerika', fact: 'Alert is de noordelijkste permanent bewoonde plek op aarde.' },
-  { name: 'Spitsbergen, Noorwegen', km: 37200, region: 'Europa', fact: 'Op Spitsbergen wonen naar schatting meer ijsberen dan mensen.' },
-  { name: 'Terug in Nordkapp — rond!', km: 39700, region: 'Europa', fact: 'Van hier tot hier: jullie zijn de hele aardbol rond geweest, over beide polen.' }
+  { name: 'Nordkapp, Noorwegen', km: 0, region: 'Europa', lat: 71.17, lon: 25.78, fact: 'Het noordelijkste punt van het Europese vaste continent, met een klif van 307 meter boven de Barentszzee.' },
+  { name: 'Oslo, Noorwegen', km: 1550, region: 'Europa', lat: 59.91, lon: 10.75, fact: 'Oslo is bijna half omringd door bos — een van de groenste hoofdsteden van Europa.' },
+  { name: 'Kopenhagen, Denemarken', km: 1900, region: 'Europa', lat: 55.68, lon: 12.57, fact: 'Kopenhagen heeft meer fietsen dan inwoners.' },
+  { name: 'Berlijn, Duitsland', km: 2200, region: 'Europa', lat: 52.52, lon: 13.40, fact: 'Berlijn telt meer bruggen dan Venetië.' },
+  { name: 'Wenen, Oostenrijk', km: 2600, region: 'Europa', lat: 48.21, lon: 16.37, fact: 'Wenen wordt al jaren op rij verkozen tot een van de meest leefbare steden ter wereld.' },
+  { name: 'Rome, Italië', km: 3200, region: 'Europa', lat: 41.90, lon: 12.50, fact: 'Rome staat bekend als "de Eeuwige Stad" en is gebouwd op zeven heuvels.' },
+  { name: 'Valletta, Malta', km: 3500, region: 'Europa', lat: 35.90, lon: 14.51, fact: 'Valletta is met nog geen 6.000 inwoners binnen de muren de kleinste hoofdstad van de EU.' },
+  { name: 'Tripoli, Libië', km: 3900, region: 'Afrika', lat: 32.89, lon: 13.19, fact: 'Tripoli ligt precies op de grens tussen de Middellandse Zee en de Sahara.' },
+  { name: 'Agadez, Niger', km: 5200, region: 'Afrika', lat: 16.97, lon: 7.99, fact: 'Agadez wordt "de poort van de woestijn" genoemd, al eeuwen een knooppunt voor karavanen.' },
+  { name: 'Lagos, Nigeria', km: 6100, region: 'Afrika', lat: 6.52, lon: 3.38, fact: 'Met ruim 15 miljoen inwoners is Lagos de grootste stad van Afrika.' },
+  { name: 'Kinshasa, DR Congo', km: 7100, region: 'Afrika', lat: -4.32, lon: 15.31, fact: 'Kinshasa en Brazzaville zijn de dichtst bij elkaar gelegen hoofdsteden van twee landen wereldwijd.' },
+  { name: 'Lusaka, Zambia', km: 7900, region: 'Afrika', lat: -15.39, lon: 28.32, fact: 'Lusaka ligt op zowat 1.300 meter hoogte, wat het klimaat er opvallend mild maakt.' },
+  { name: 'Johannesburg, Zuid-Afrika', km: 8700, region: 'Afrika', lat: -26.20, lon: 28.05, fact: 'Johannesburg is de grootste stad ter wereld die niet aan een rivier, meer of kust ligt.' },
+  { name: 'Kaap Agulhas, Zuid-Afrika', km: 9400, region: 'Afrika', lat: -34.83, lon: 20.02, fact: 'Niet Kaapstad, maar hier ligt het echte zuidelijkste punt van Afrika.' },
+  { name: 'Kust van Antarctica (Koningin Maudland)', km: 13400, region: 'Antarctica', lat: -70, lon: 10, fact: 'Antarctica is het droogste, koudste én winderigste continent op aarde.' },
+  { name: 'Zuidpool (Amundsen-Scott)', km: 14700, region: 'Antarctica', lat: -90, lon: 0, fact: 'Op de Zuidpool zelf gaat de zon maar twee keer per jaar op en onder.' },
+  { name: 'Ushuaia, Argentinië', km: 17500, region: 'ZuidAmerika', lat: -54.81, lon: -68.31, fact: 'Ushuaia noemt zichzelf "el fin del mundo" — het einde van de wereld.' },
+  { name: 'Buenos Aires, Argentinië', km: 19700, region: 'ZuidAmerika', lat: -34.60, lon: -58.38, fact: 'Buenos Aires heeft met de Avenida 9 de Julio een van de breedste avenues ter wereld.' },
+  { name: 'São Paulo, Brazilië', km: 20700, region: 'ZuidAmerika', lat: -23.55, lon: -46.63, fact: 'São Paulo is de grootste stad van het volledige zuidelijk halfrond.' },
+  { name: 'Brasília, Brazilië', km: 21700, region: 'ZuidAmerika', lat: -15.79, lon: -47.88, fact: 'Brasília werd in nog geen vier jaar helemaal vanaf niets gebouwd, met een plattegrond in de vorm van een vliegtuig.' },
+  { name: 'Belém, Brazilië', km: 23000, region: 'ZuidAmerika', lat: -1.46, lon: -48.50, fact: 'Belém ligt aan de mond van de Amazone en wordt "de poort van de Amazone" genoemd.' },
+  { name: 'Caracas, Venezuela', km: 24800, region: 'ZuidAmerika', lat: 10.48, lon: -66.90, fact: 'Caracas ligt verscholen in een vallei, op meer dan 900 meter hoogte tussen bergen en Caribische kust.' },
+  { name: 'Bogotá, Colombia', km: 25400, region: 'ZuidAmerika', lat: 4.71, lon: -74.07, fact: 'Op ruim 2.600 meter hoogte is Bogotá een van de hoogst gelegen hoofdsteden ter wereld.' },
+  { name: 'Ciudad de Panamá, Panama', km: 26300, region: 'NoordAmerika', lat: 8.98, lon: -79.52, fact: 'Vanuit Panama-Stad kan je de zon zowel over de Atlantische als over de Grote Oceaan zien opkomen.' },
+  { name: 'Ciudad de México, Mexico', km: 28000, region: 'NoordAmerika', lat: 19.43, lon: -99.13, fact: 'Mexico-Stad zakt elk jaar een paar centimeter, omdat het op een opgevuld meer gebouwd is.' },
+  { name: 'Denver, Verenigde Staten', km: 29800, region: 'NoordAmerika', lat: 39.74, lon: -104.99, fact: 'Denver noemt zichzelf de "Mile High City" — precies 5.280 voet, of 1.609 meter, boven zeeniveau.' },
+  { name: 'Winnipeg, Canada', km: 31300, region: 'NoordAmerika', lat: 49.90, lon: -97.14, fact: 'Winnipeg ligt op de samenvloeiing van de Red en de Assiniboine River, al eeuwen een handelsknooppunt.' },
+  { name: 'Yellowknife, Canada', km: 32700, region: 'NoordAmerika', lat: 62.45, lon: -114.37, fact: 'Yellowknife is een van de beste plekken op aarde om het noorderlicht te zien.' },
+  { name: 'Alert, Canada', km: 34700, region: 'NoordAmerika', lat: 82.50, lon: -62.35, fact: 'Alert is de noordelijkste permanent bewoonde plek op aarde.' },
+  { name: 'Spitsbergen, Noorwegen', km: 37200, region: 'Europa', lat: 78.22, lon: 15.65, fact: 'Op Spitsbergen wonen naar schatting meer ijsberen dan mensen.' },
+  { name: 'Terug in Nordkapp — rond!', km: 39700, region: 'Europa', lat: 71.17, lon: 25.78, fact: 'Van hier tot hier: jullie zijn de hele aardbol rond geweest, over beide polen.' }
 ];
 const ROUTE_TOTAL = ROUTE[ROUTE.length - 1].km;
 /* ===================================================== */
@@ -609,6 +630,122 @@ function computeWorldKm(entries){
   return Math.min(km, ROUTE_TOTAL);
 }
 
+function interpolateCurrentPosition(km){
+  const idx = currentWaypointIndex(km);
+  const current = ROUTE[idx];
+  const next = ROUTE[idx + 1];
+  if(!next || km >= ROUTE_TOTAL){
+    return { lat: current.lat, lon: current.lon, idx };
+  }
+  const span = next.km - current.km;
+  const into = km - current.km;
+  const pct = span > 0 ? into / span : 0;
+  return {
+    lat: current.lat + (next.lat - current.lat) * pct,
+    lon: current.lon + (next.lon - current.lon) * pct,
+    idx
+  };
+}
+
+// Orthografische projectie: geeft de globe het gevoel van een echte bol,
+// steeds gecentreerd op de huidige positie.
+function projectPoint(lat, lon, lat0, lon0, R){
+  const rad = Math.PI / 180;
+  const phi = lat * rad, lambda = lon * rad, phi0 = lat0 * rad, lambda0 = lon0 * rad;
+  const cosc = Math.sin(phi0) * Math.sin(phi) + Math.cos(phi0) * Math.cos(phi) * Math.cos(lambda - lambda0);
+  const x = R * Math.cos(phi) * Math.sin(lambda - lambda0);
+  const y = R * (Math.cos(phi0) * Math.sin(phi) - Math.sin(phi0) * Math.cos(phi) * Math.cos(lambda - lambda0));
+  return { x: x, y: -y, visible: cosc > 0 };
+}
+
+function buildGraticulePaths(lat0, lon0, R){
+  const paths = [];
+  for(let lon = -180; lon < 180; lon += 30){
+    const pts = [];
+    for(let lat = -90; lat <= 90; lat += 5){
+      pts.push(projectPoint(lat, lon, lat0, lon0, R));
+    }
+    paths.push({ pts, main: lon === 0 });
+  }
+  for(let lat = -60; lat <= 60; lat += 30){
+    const pts = [];
+    for(let lon = -180; lon <= 180; lon += 5){
+      pts.push(projectPoint(lat, lon, lat0, lon0, R));
+    }
+    paths.push({ pts, main: lat === 0 });
+  }
+  return paths;
+}
+
+function graticuleToSvg(paths){
+  let svg = '';
+  paths.forEach(pathObj => {
+    let run = [];
+    const flush = () => {
+      if(run.length > 1){
+        const d = run.map(p => p.x.toFixed(2) + ',' + p.y.toFixed(2)).join(' ');
+        svg += '<polyline class="globe-graticule' + (pathObj.main ? ' main' : '') + '" points="' + d + '"/>';
+      }
+      run = [];
+    };
+    pathObj.pts.forEach(p => { if(p.visible) run.push(p); else flush(); });
+    flush();
+  });
+  return svg;
+}
+
+function renderGlobe(km){
+  const svg = document.getElementById('globeSvg');
+  const R = 95;
+  const pos = interpolateCurrentPosition(km);
+  const lat0 = pos.lat, lon0 = pos.lon;
+
+  let html = '<circle class="globe-sphere" cx="0" cy="0" r="' + R + '"/>';
+  html += graticuleToSvg(buildGraticulePaths(lat0, lon0, R));
+
+  const projected = ROUTE.map(wp => projectPoint(wp.lat, wp.lon, lat0, lon0, R));
+
+  let seg = [];
+  const flushSeg = () => {
+    if(seg.length > 1){
+      const d = seg.map(p => p.x.toFixed(2) + ',' + p.y.toFixed(2)).join(' ');
+      html += '<polyline class="globe-path" points="' + d + '"/>';
+    }
+    seg = [];
+  };
+  projected.forEach(p => { if(p.visible) seg.push(p); else flushSeg(); });
+  flushSeg();
+
+  projected.forEach((p, i) => {
+    if(!p.visible || i === pos.idx) return;
+    const cls = i < pos.idx ? 'globe-dot-passed' : 'globe-dot-future';
+    html += '<circle class="' + cls + '" cx="' + p.x.toFixed(2) + '" cy="' + p.y.toFixed(2) + '" r="2.6"/>';
+  });
+
+  html += '<circle class="globe-dot-current" cx="0" cy="0" r="4.5"><animate attributeName="r" values="4.5;6.5;4.5" dur="2s" repeatCount="indefinite"/></circle>';
+
+  svg.innerHTML = html;
+}
+
+function renderActiveRow(entries){
+  const container = document.getElementById('activeRow');
+  const cutoffDates = new Set();
+  for(let i = 0; i < 7; i++){ cutoffDates.add(dateStrOffset(i)); }
+  const activePersons = [...new Set(entries.filter(e => cutoffDates.has(e.date)).map(e => e.person))].sort();
+
+  if(!activePersons.length){
+    container.innerHTML = '<div class="active-empty">Nog niemand deze week gelogd.</div>';
+    return;
+  }
+  const avatarsHtml = activePersons.map(p => {
+    const av = getAvatarForPerson(p);
+    return av
+      ? '<img class="avatar-mini" src="' + av + '" title="' + p + '" alt="' + p + '">'
+      : '<span class="avatar-mini" style="display:inline-block;background:var(--line);" title="' + p + '"></span>';
+  }).join('');
+  container.innerHTML = avatarsHtml + '<div class="active-label" style="flex-basis:100%;">nog mee deze week</div>';
+}
+
 function currentWaypointIndex(km){
   let idx = 0;
   for(let i = 0; i < ROUTE.length; i++){
@@ -705,6 +842,8 @@ function renderAllFromCache(){
 
   const km = computeWorldKm(entries);
   const idx = renderJourney(km);
+  renderGlobe(km);
+  renderActiveRow(entries);
 
   const milestoneEl = document.getElementById('milestone');
   if(idx > lastCelebratedIdx && idx > 0){
