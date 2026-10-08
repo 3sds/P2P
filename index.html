@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Samen de wereld rond</title>
+<title>Samen sterk</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%231a0f2e'/%3E%3Ccircle cx='256' cy='140' r='80' fill='%23fff' stroke='%23ff6b6b' stroke-width='8'/%3E%3Cpath d='M256 70 L230 90 L256 110 L282 90 Z' fill='%23ff0000'/%3E%3Ccircle cx='235' cy='130' r='8' fill='%23000'/%3E%3Ccircle cx='277' cy='130' r='8' fill='%23000'/%3E%3Cpath d='M256 155 L215 170 L256 180 L297 170 Z' fill='%23ffa500'/%3E%3Crect x='170' y='220' width='172' height='200' rx='86' fill='%238B4513'/%3E%3Ccircle cx='190' cy='260' r='7' fill='%23F5DEB3'/%3E%3Ccircle cx='240' cy='280' r='7' fill='%23F5DEB3'/%3E%3Ccircle cx='272' cy='275' r='7' fill='%23F5DEB3'/%3E%3Ccircle cx='310' cy='290' r='7' fill='%23F5DEB3'/%3E%3Ccircle cx='210' cy='320' r='7' fill='%23F5DEB3'/%3E%3Ccircle cx='280' cy='340' r='7' fill='%23F5DEB3'/%3E%3Ccircle cx='256' cy='360' r='7' fill='%23F5DEB3'/%3E%3C/svg%3E">
@@ -165,11 +165,26 @@
   .globe-path{fill:none; stroke:var(--gold); stroke-width:1; stroke-dasharray:2,2; opacity:0.7;}
 
   .active-row{margin:14px 0 4px;}
-  .active-label{font-size:0.7rem; color:var(--ink-soft); text-align:center; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:10px;}
-  .active-items{display:flex; flex-wrap:wrap; gap:14px 10px; justify-content:center;}
-  .active-item{display:flex; flex-direction:column; align-items:center; gap:5px; width:60px;}
-  .active-item .avatar-mini{width:46px; height:46px;}
-  .active-name{font-size:0.7rem; color:var(--ink-soft); text-align:center; line-height:1.15; word-break:break-word;}
+  .active-label{font-size:0.7rem; color:var(--ink-soft); text-align:center; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:6px;}
+  .boat{position:relative; max-width:340px; margin:0 auto; padding-top:8px;}
+  .boat-body{position:relative; padding:0 14px 14px;}
+  .boat-body::before{
+    content:''; position:absolute; left:0; right:0; top:34px; bottom:0;
+    background:linear-gradient(#8B5A33, #6A4126);
+    border-top:5px solid #C99A62;
+    border-radius:6px 6px 38px 38px;
+    box-shadow:0 2px 0 rgba(0,0,0,0.08);
+  }
+  .boat-items{position:relative; display:flex; flex-wrap:wrap; gap:10px 8px; justify-content:center;}
+  .active-item{display:flex; flex-direction:column; align-items:center; gap:4px; width:60px;}
+  .active-item .avatar-mini{width:46px; height:46px; border:2px solid #F3E7D3;}
+  .active-name{font-size:0.7rem; color:#F3E7D3; text-align:center; line-height:1.15; word-break:break-word;}
+  .boat-flag{position:absolute; top:-6px; right:26px; width:2px; height:40px; background:#6A4126; z-index:2;}
+  .boat-flag::after{content:''; position:absolute; top:0; left:2px; width:16px; height:11px; background:var(--accent); clip-path:polygon(0 0, 100% 50%, 0 100%);}
+  .boat-waves{
+    position:relative; height:10px; margin-top:-6px;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='10' viewBox='0 0 24 10'%3E%3Cpath d='M0 5 Q6 0 12 5 T24 5' fill='none' stroke='rgb(127,179,206)' stroke-width='2.2'/%3E%3C/svg%3E") repeat-x center;
+  }
   .active-empty{font-size:0.78rem; color:var(--ink-soft); text-align:center; margin:8px 0 4px;}
 
   .journey-current{
@@ -223,6 +238,42 @@
   .region-tag.ZuidAmerika{background:var(--zuidamerika);}
   .region-tag.NoordAmerika{background:var(--noordamerika);}
 
+  .beta{
+    display:inline-block; font-family:'Inter',sans-serif; font-size:0.6rem; font-weight:700;
+    letter-spacing:0.08em; padding:2px 6px; border-radius:6px; background:var(--accent); color:#fff;
+    margin-left:8px; vertical-align:middle; position:relative; top:-3px;
+  }
+
+  /* ---------- Persoonlijke stats ---------- */
+  .stats-sub{font-size:0.8rem; color:var(--ink-soft); margin-top:4px;}
+  .chart-box{position:relative; margin-top:14px;}
+  .chart-box svg{display:block; width:100%; height:auto; touch-action:pan-y;}
+  .ch-grid{stroke:var(--line); stroke-width:1; shape-rendering:crispEdges;}
+  .ch-axis{fill:var(--ink-soft); font-family:'Inter',sans-serif; font-size:9px;}
+  .ch-peak{fill:var(--ink); font-family:'Inter',sans-serif; font-size:9px; font-weight:600;}
+  .ch-bar{fill:var(--done);}
+  .ch-bar.hl{fill:var(--ink);}
+  .chart-tip{
+    position:absolute; display:none; pointer-events:none; z-index:3;
+    background:var(--ink); color:var(--paper); font-size:0.75rem; padding:4px 8px;
+    border-radius:6px; white-space:nowrap; transform:translate(-50%,-100%);
+  }
+  .chart-summary{font-size:0.8rem; color:var(--ink-soft); margin-top:10px;}
+  .chart-table{margin-top:10px; font-size:0.8rem; color:var(--ink-soft);}
+  .chart-table summary{cursor:pointer;}
+  .chart-table-scroll{max-height:180px; overflow-y:auto; margin-top:8px;}
+  .chart-table table{width:100%; border-collapse:collapse;}
+  .chart-table td{padding:4px 0; border-bottom:1px solid var(--line); font-variant-numeric:tabular-nums;}
+  .chart-table td:last-child{text-align:right; color:var(--ink);}
+
+  .streak-row{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line);}
+  .streak-row:last-child{border-bottom:none; padding-bottom:0;}
+  .streak-row .avatar-mini{width:30px; height:30px;}
+  .streak-name{width:76px; font-size:0.85rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .streak-track{flex:1; height:8px; background:#E4E9DC; border-radius:4px; overflow:hidden;}
+  .streak-fill{height:100%; background:var(--gold); border-radius:4px;}
+  .streak-val{min-width:58px; text-align:right; font-size:0.85rem; font-weight:700; font-variant-numeric:tabular-nums;}
+
   footer{text-align:center; color:var(--ink-soft); font-size:0.75rem; margin-top:30px;}
 
   /* ---------- Loading spinner ---------- */
@@ -246,7 +297,7 @@
 
 <div id="gate">
   <div class="card">
-    <h1>Samen de wereld rond</h1>
+    <h1>Samen sterk<span class="beta">BETA</span></h1>
     <p class="tagline"></p>
     <input type="password" id="pwInput" placeholder="Wachtwoord">
     <button onclick="tryPassword()">Naar binnen</button>
@@ -258,8 +309,7 @@
   <div id="app">
     <div class="top">
       <div>
-        <h1>Samen de wereld rond</h1>
-        <p class="tagline">Hoe meer mensen meedoen, hoe sneller we vooruit gaan.</p>
+        <h1>Samen sterk<span class="beta">BETA</span></h1>
       </div>
       <div class="whoami">
         <div class="whoami-id">
@@ -326,7 +376,24 @@
       <div class="route-list" id="routeList"></div>
     </div>
 
-    <footer>Km = (aantal mensen dat die dag pompte) × (som van alle reps die dag).<br>Route: Nordkaap → Zuidpool → Zuid-Amerika → Noord-Amerika → terug naar Nordkapp, ± <span id="routeTotalLabel"></span> km.
+    <div class="card">
+      <h3>Mijn stats</h3>
+      <div class="stats-sub">Reps per dag, laatste 30 dagen</div>
+      <div class="chart-box" id="myChart"></div>
+      <div class="chart-summary" id="chartSummary"></div>
+      <details class="chart-table">
+        <summary>Bekijk als tabel</summary>
+        <div class="chart-table-scroll" id="chartTable"></div>
+      </details>
+    </div>
+
+    <div class="card">
+      <h3>Langste streak</h3>
+      <div class="stats-sub">Wie er de voorbije week bij was, aantal dagen op rij</div>
+      <div id="streakList"></div>
+    </div>
+
+    <footer>Km = (aantal mensen dat die dag pompte) × (som van alle reps die dag).<br>Route: Nordkapp → Zuidpool → Zuid-Amerika → Noord-Amerika → terug naar Nordkapp, ± <span id="routeTotalLabel"></span> km.
       <div class="signature">
         <svg viewBox="130 40 260 400" width="16" height="25">
           <circle cx="256" cy="140" r="80" fill="#fff" stroke="#ff6b6b" stroke-width="8"/>
@@ -353,7 +420,7 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbzI5yeTaoolwROQW1jo_PI_fykQU49nAFVS32rvaSD1_ComRn4YAkyxUgy15OvOJihs0g/exec';
 const APP_PASSWORD = '75'; // moet gelijk zijn aan SECRET in Code.gs
 
-/* De wereldroute: een volledige polaire rondreis, Nordkaap terug tot Nordkapp.
+/* De wereldroute: een volledige polaire rondreis, Nordkapp terug tot Nordkapp.
    Bewust eerst noord-zuid door Europa en Afrika (niet meteen weken oceaan),
    dan Antarctica, dan omhoog door Zuid- en Noord-Amerika en over de
    Noordpool terug naar het vertrekpunt. km = cumulatieve afstand vanaf start.
@@ -788,11 +855,146 @@ function renderGlobe(km){
   svg.innerHTML = html;
 }
 
-function renderActiveRow(entries){
-  const container = document.getElementById('activeRow');
+function activePersonsThisWeek(entries){
   const cutoffDates = new Set();
   for(let i = 0; i < 7; i++){ cutoffDates.add(dateStrOffset(i)); }
-  const activePersons = [...new Set(entries.filter(e => cutoffDates.has(e.date)).map(e => e.person))].sort();
+  return [...new Set(entries.filter(e => cutoffDates.has(e.date)).map(e => e.person))].sort();
+}
+
+function dayNumber(ds){
+  const [y, m, d] = ds.split('-').map(Number);
+  return Math.round(Date.UTC(y, m - 1, d) / 86400000);
+}
+
+function longestStreak(dates){
+  const nums = [...new Set(dates.map(dayNumber))].sort((a, b) => a - b);
+  let best = 0, run = 0, prev = null;
+  nums.forEach(n => {
+    run = (prev !== null && n === prev + 1) ? run + 1 : 1;
+    if(run > best) best = run;
+    prev = n;
+  });
+  return best;
+}
+
+function fmtDayLong(ds){
+  const [y, m, d] = ds.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('nl-BE', { weekday: 'short', day: 'numeric', month: 'numeric' });
+}
+
+function renderStreaks(entries){
+  const box = document.getElementById('streakList');
+  const persons = activePersonsThisWeek(entries);
+  if(!persons.length){
+    box.innerHTML = '<div class="active-empty" style="text-align:left;">Nog niemand deze week gelogd.</div>';
+    return;
+  }
+  const rows = persons.map(p => ({
+    person: p,
+    best: longestStreak(entries.filter(e => e.person === p).map(e => e.date))
+  }));
+  const max = Math.max(1, ...rows.map(r => r.best));
+  box.innerHTML = rows.map(r => {
+    const av = getAvatarForPerson(r.person);
+    const img = av
+      ? '<img class="avatar-mini" src="' + av + '" alt="">'
+      : '<span class="avatar-mini" style="display:inline-block;background:var(--line);"></span>';
+    return '<div class="streak-row">' + img +
+      '<div class="streak-name">' + r.person + '</div>' +
+      '<div class="streak-track"><div class="streak-fill" style="width:' + Math.round(r.best / max * 100) + '%"></div></div>' +
+      '<div class="streak-val">' + r.best + (r.best === 1 ? ' dag' : ' dagen') + '</div></div>';
+  }).join('');
+}
+
+function renderMyChart(entries){
+  const W = 340, H = 180, L = 30, R = 8, T = 16, B = 26;
+  const plotW = W - L - R, plotH = H - T - B;
+  const N = 30, slot = plotW / N, bw = 7;
+
+  const days = [];
+  for(let i = N - 1; i >= 0; i--) days.push(dateStrOffset(i));
+  const perDay = {};
+  entries.filter(e => e.person === me).forEach(e => {
+    perDay[e.date] = (perDay[e.date] || 0) + (Number(e.reps) || 0);
+  });
+  const vals = days.map(d => perDay[d] || 0);
+  const maxV = Math.max(...vals);
+  const yMax = Math.max(10, Math.ceil(maxV / 10) * 10);
+  const yOf = v => T + plotH - (v / yMax) * plotH;
+
+  let svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Reps per dag, laatste 30 dagen">';
+  [0, yMax / 2, yMax].forEach(t => {
+    const y = yOf(t);
+    svg += '<line class="ch-grid" x1="' + L + '" x2="' + (W - R) + '" y1="' + y + '" y2="' + y + '"/>';
+    svg += '<text class="ch-axis" x="' + (L - 6) + '" y="' + (y + 3) + '" text-anchor="end">' + t + '</text>';
+  });
+
+  const peakIdx = maxV > 0 ? vals.indexOf(maxV) : -1;
+  vals.forEach((v, i) => {
+    if(v <= 0) return;
+    const x = L + i * slot + (slot - bw) / 2;
+    const y = yOf(v), h = T + plotH - y, r = Math.min(3, h);
+    svg += '<path class="ch-bar" data-i="' + i + '" d="M' + x + ',' + (y + h) + ' L' + x + ',' + (y + r) +
+      ' Q' + x + ',' + y + ' ' + (x + r) + ',' + y + ' L' + (x + bw - r) + ',' + y +
+      ' Q' + (x + bw) + ',' + y + ' ' + (x + bw) + ',' + (y + r) + ' L' + (x + bw) + ',' + (y + h) + ' Z"/>';
+  });
+
+  if(peakIdx >= 0){
+    const px = Math.min(W - R - 8, Math.max(L + 8, L + (peakIdx + 0.5) * slot));
+    svg += '<text class="ch-peak" x="' + px + '" y="' + (yOf(maxV) - 4) + '" text-anchor="middle">' + maxV + '</text>';
+  }
+
+  [0, 7, 14, 21, 29].forEach(i => {
+    const [y_, m, d] = days[i].split('-').map(Number);
+    const label = i === N - 1 ? 'vandaag' : d + '/' + m;
+    const anchor = i === N - 1 ? 'end' : 'middle';
+    const x = i === N - 1 ? W - R : L + (i + 0.5) * slot;
+    svg += '<text class="ch-axis" x="' + x + '" y="' + (H - 8) + '" text-anchor="' + anchor + '">' + label + '</text>';
+  });
+  svg += '</svg><div class="chart-tip" id="chartTip"></div>';
+
+  const box = document.getElementById('myChart');
+  box.innerHTML = svg;
+  const svgEl = box.querySelector('svg');
+  const tip = document.getElementById('chartTip');
+
+  function showTip(ev){
+    const rect = svgEl.getBoundingClientRect();
+    const px = (ev.clientX - rect.left) / rect.width * W;
+    const i = Math.floor((px - L) / slot);
+    box.querySelectorAll('.ch-bar.hl').forEach(el => el.classList.remove('hl'));
+    if(i < 0 || i >= N){ tip.style.display = 'none'; return; }
+    const bar = svgEl.querySelector('[data-i="' + i + '"]');
+    if(bar) bar.classList.add('hl');
+    tip.textContent = fmtDayLong(days[i]) + ' · ' + vals[i] + ' reps';
+    tip.style.display = 'block';
+    const half = tip.offsetWidth / 2;
+    const cx = (L + (i + 0.5) * slot) / W * rect.width;
+    tip.style.left = Math.min(rect.width - half, Math.max(half, cx)) + 'px';
+    tip.style.top = (Math.min(yOf(vals[i]), T + plotH - 6) / H * rect.height - 4) + 'px';
+  }
+  function hideTip(){
+    tip.style.display = 'none';
+    box.querySelectorAll('.ch-bar.hl').forEach(el => el.classList.remove('hl'));
+  }
+  svgEl.addEventListener('pointermove', showTip);
+  svgEl.addEventListener('pointerdown', showTip);
+  svgEl.addEventListener('pointerleave', hideTip);
+
+  const total = vals.reduce((a, b) => a + b, 0);
+  const active = vals.filter(v => v > 0).length;
+  document.getElementById('chartSummary').textContent = total
+    ? total + ' reps in 30 dagen · ' + active + ' van 30 dagen gelogd'
+    : 'Nog niets gelogd in de afgelopen 30 dagen.';
+
+  document.getElementById('chartTable').innerHTML = '<table>' +
+    days.slice().reverse().map((d, k) => '<tr><td>' + fmtDayLong(d) + '</td><td>' + vals[N - 1 - k] + '</td></tr>').join('') +
+    '</table>';
+}
+
+function renderActiveRow(entries){
+  const container = document.getElementById('activeRow');
+  const activePersons = activePersonsThisWeek(entries);
 
   if(!activePersons.length){
     container.innerHTML = '<div class="active-label">mee op reis deze week</div><div class="active-empty">Nog niemand deze week gelogd.</div>';
@@ -805,7 +1007,13 @@ function renderActiveRow(entries){
       : '<span class="avatar-mini" style="display:inline-block;background:var(--line);"></span>';
     return '<div class="active-item">' + img + '<div class="active-name">' + p + '</div></div>';
   }).join('');
-  container.innerHTML = '<div class="active-label">mee op reis deze week</div><div class="active-items">' + itemsHtml + '</div>';
+  container.innerHTML =
+    '<div class="active-label">mee op reis deze week</div>' +
+    '<div class="boat">' +
+      '<div class="boat-flag"></div>' +
+      '<div class="boat-body"><div class="boat-items">' + itemsHtml + '</div></div>' +
+      '<div class="boat-waves"></div>' +
+    '</div>';
 }
 
 function currentWaypointIndex(km){
@@ -859,7 +1067,7 @@ function renderJourney(km){
 
   const noteEl = document.getElementById('journeyNote');
   if(km >= ROUTE_TOTAL){
-    noteEl.textContent = 'Jullie zijn de hele wereld rond geweest, van de Noordkaap terug tot de Noordkaap. 🎉';
+    noteEl.textContent = 'Jullie zijn de hele wereld rond geweest, van de Nordkapp terug tot de Nordkapp. 🎉';
   } else if(next){
     const span = next.km - current.km;
     const into = km - current.km;
@@ -886,8 +1094,6 @@ function renderJourney(km){
   return idx;
 }
 
-let lastCelebratedIdx = Number(localStorage.getItem('pushup_last_celebrated') || -1);
-
 function renderAllFromCache(){
   const entries = cachedEntries;
   const today = dateStrOffset(0);
@@ -906,13 +1112,13 @@ function renderAllFromCache(){
   const idx = renderJourney(km);
   renderGlobe(km);
   renderActiveRow(entries);
+  renderMyChart(entries);
+  renderStreaks(entries);
 
   const milestoneEl = document.getElementById('milestone');
-  if(idx > lastCelebratedIdx && idx > 0){
+  if(idx > 0){
     milestoneEl.style.display = 'block';
     milestoneEl.textContent = 'Aangekomen in ' + ROUTE[idx].name + '! ' + (ROUTE[idx].fact || '');
-    lastCelebratedIdx = idx;
-    localStorage.setItem('pushup_last_celebrated', String(idx));
   } else {
     milestoneEl.style.display = 'none';
   }
