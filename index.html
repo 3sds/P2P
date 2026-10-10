@@ -167,6 +167,11 @@
   .active-row{margin:14px 0 4px;}
   .active-label{font-size:0.7rem; color:var(--ink-soft); text-align:center; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:6px;}
   .boat-svg{display:block; width:100%; max-width:340px; margin:0 auto; overflow:visible;}
+  .boat-caption{font-size:0.78rem; color:var(--ink-soft); text-align:center; margin:6px 0 2px; line-height:1.5;}
+  .reward-card{background:linear-gradient(135deg,#FFF6DA,#FBE7B0); border:1px solid #E8C566; border-radius:14px; padding:14px 16px; margin-bottom:12px; box-shadow:0 2px 10px rgba(221,161,59,0.25);}
+  .reward-kicker{font-size:0.72rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#8A6419;}
+  .reward-title{font-family:'Fraunces',serif; font-size:1.2rem; font-weight:600; color:var(--ink); margin:2px 0 4px;}
+  .reward-text{font-size:0.88rem; color:var(--ink); line-height:1.45;}
   .active-empty{font-size:0.78rem; color:var(--ink-soft); text-align:center; margin:8px 0 4px;}
 
   .journey-current{
@@ -337,6 +342,7 @@
       </div>
     </div>
 
+    <div id="rewardBox" style="display:none;"></div>
     <div class="milestone" id="milestone"></div>
 
     <div class="card today">
@@ -1015,13 +1021,159 @@ function esc(str){
   return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-function buildBoatSvg(persons){
+/* ---------- Beloningen: elke mijlpaal in totaal aantal reps levert een blijvend extraatje op de boot.
+   Nieuwe beloning toevoegen = één regel bij REWARDS + (eventueel) een tekenfunctie in REWARD_ART. ---------- */
+const REWARD_WINDOW_DAYS = 3;   // zolang blijft het felicitatievakje staan
+const REWARDS = [
+  { reps: 1000, id: 'knut',   title: 'Knut',            text: 'Knut, een klein ijsbeertje, mag mee als passagier. Hij houdt het dek in de gaten.' },
+  { reps: 2000, id: 'kerst',  title: 'Kerstverlichting', text: 'De boot hangt vol kerstverlichting. Het is hier ineens heel gezellig.' },
+  { reps: 3000, id: 'palm',   title: 'Een palmboom',     text: 'Een palmboom op het voordek, want een boot vol sterke mensen verdient een beetje tropen.' },
+  { reps: 4000, id: 'zangers', title: 'Nicole & Hugo',   text: 'Twee charmezangers komen aan boord om jullie met een serenade verder te loodsen.' },
+  { reps: 5000, id: 'hans',   title: 'Hans Van Aken',    text: 'Oh nee! Hans Van Aken komt aan boord met zijn Gouden Schoenen. Welke onverlaat heeft hem uitgenodigd?' },
+  { reps: 6000, id: 'dolfijn', title: 'Dolfijnen',       text: 'Twee dolfijnen zwemmen met jullie mee en springen vrolijk uit het water.' }
+];
+
+// y-waarde van de reling op een gegeven x (de reling is een bocht, de achtersteven ligt lager dan de boeg)
+function sheerYAt(x, x0, x1, Dy){
+  const w = x1 - x0;
+  const P = [[x0, Dy - 6], [x0 + w * 0.30, Dy + 4], [x0 + w * 0.68, Dy + 4], [x1, Dy - 16]];
+  let best = P[0][1], bd = 1e9;
+  for(let i = 0; i <= 60; i++){
+    const t = i / 60, u = 1 - t;
+    const bx = u*u*u*P[0][0] + 3*u*u*t*P[1][0] + 3*u*t*t*P[2][0] + t*t*t*P[3][0];
+    const by = u*u*u*P[0][1] + 3*u*u*t*P[1][1] + 3*u*t*t*P[2][1] + t*t*t*P[3][1];
+    if(Math.abs(bx - x) < bd){ bd = Math.abs(bx - x); best = by; }
+  }
+  return best;
+}
+
+const REWARD_ART = {
+  knut(x, y){
+    return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"><title>Knut</title>
+      <ellipse cx="0" cy="-7" rx="8.5" ry="7.5" fill="#F7FAFB" stroke="#B9CBD3" stroke-width="1"/>
+      <ellipse cx="-4" cy="-0.5" rx="3.2" ry="2" fill="#F7FAFB" stroke="#B9CBD3" stroke-width="1"/>
+      <ellipse cx="4.5" cy="-0.5" rx="3.2" ry="2" fill="#F7FAFB" stroke="#B9CBD3" stroke-width="1"/>
+      <circle cx="-3" cy="-20" r="2.6" fill="#F7FAFB" stroke="#B9CBD3" stroke-width="1"/>
+      <circle cx="5" cy="-20" r="2.6" fill="#F7FAFB" stroke="#B9CBD3" stroke-width="1"/>
+      <circle cx="1" cy="-16" r="6.4" fill="#F7FAFB" stroke="#B9CBD3" stroke-width="1"/>
+      <ellipse cx="3" cy="-14.2" rx="3" ry="2.2" fill="#E8EFF2"/>
+      <circle cx="3.6" cy="-15" r="1.1" fill="#27333A"/>
+      <circle cx="-0.8" cy="-17.2" r="0.9" fill="#27333A"/><circle cx="3.2" cy="-17.2" r="0.9" fill="#27333A"/>
+      <path d="M-6,-10.5 Q1,-7.5 8,-10.5 L8,-8.3 Q1,-5.3 -6,-8.3 Z" fill="#E15A3F"/>
+      <path d="M5.5,-9 l1.6,5 l2.4,-0.8 l-1.2,-4.4 z" fill="#E15A3F"/>
+    </g>`;
+  },
+  palm(x, y){
+    const anim = REDUCED_MOTION ? '' : `<animateTransform attributeName="transform" type="rotate" values="-2 0 -38;2 0 -38;-2 0 -38" dur="4.5s" repeatCount="indefinite"/>`;
+    return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"><title>Palmboom</title>
+      <path d="M0,0 C-1,-14 3,-26 1,-39" fill="none" stroke="#8A5A33" stroke-width="3.4" stroke-linecap="round"/>
+      <path d="M0.6,-9 l2.6,0.4 M0.8,-16 l2.8,0.4 M1.8,-23 l2.4,0.3 M1.5,-30 l2.2,0.2" stroke="#6A4126" stroke-width="0.9"/>
+      <g>${anim}
+        <g transform="translate(1 -39)" fill="#3E8E57" stroke="#2C6B40" stroke-width="0.7" stroke-linejoin="round">
+          <path d="M0,0 C-8,-9 -19,-6 -24,2 C-16,-3 -8,-3 0,0 Z"/>
+          <path d="M0,0 C-5,-12 -15,-14 -20,-9 C-12,-10 -6,-6 0,0 Z"/>
+          <path d="M0,0 C8,-9 19,-6 24,2 C16,-3 8,-3 0,0 Z"/>
+          <path d="M0,0 C5,-12 15,-14 20,-9 C12,-10 6,-6 0,0 Z"/>
+          <path d="M0,0 C-2,-12 2,-17 3,-19 C5,-12 3,-6 0,0 Z"/>
+          <circle cx="-1.6" cy="2.4" r="2.4" fill="#6B4527" stroke="none"/><circle cx="2.4" cy="2.6" r="2.4" fill="#7C5230" stroke="none"/>
+        </g>
+      </g>
+    </g>`;
+  },
+  zangers(x, y){
+    // x = midden tussen beide zangers
+    const note = REDUCED_MOTION ? '' : `<animate attributeName="opacity" values="0;1;1;0" dur="3s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="translate" values="0 6;0 -8" dur="3s" repeatCount="indefinite"/>`;
+    return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"><title>Nicole &amp; Hugo</title>
+      <g transform="translate(-9 0)">
+        <path d="M-5,0 L-3.4,-14 L3.4,-14 L5,0 Z" fill="#C93F4F"/>
+        <circle cx="0" cy="-18.5" r="4.4" fill="#F1C9A5"/>
+        <path d="M-4.6,-19 C-5,-25 5,-25 4.6,-19 C3,-22 -3,-22 -4.6,-19 Z" fill="#7B4A2A"/>
+        <path d="M-4.6,-19 L-5.4,-12 L-3.6,-13 Z" fill="#7B4A2A"/>
+        <circle cx="-1.4" cy="-18.4" r="0.55" fill="#27333A"/><circle cx="1.4" cy="-18.4" r="0.55" fill="#27333A"/>
+        <path d="M-1.2,-16.4 Q0,-15.4 1.2,-16.4" stroke="#B3364A" stroke-width="0.8" fill="none"/>
+      </g>
+      <g transform="translate(9 0)">
+        <path d="M-5,0 L-4,-14 L4,-14 L5,0 Z" fill="#26323B"/>
+        <path d="M-1.5,-14 L0,-9 L1.5,-14 Z" fill="#F8FAF5"/>
+        <circle cx="0" cy="-18.5" r="4.4" fill="#F1C9A5"/>
+        <path d="M-4.5,-19.5 C-4,-25 4,-25 4.5,-19.5 C2,-22 -2,-22 -4.5,-19.5 Z" fill="#3B2A22"/>
+        <circle cx="-1.4" cy="-18.4" r="0.55" fill="#27333A"/><circle cx="1.4" cy="-18.4" r="0.55" fill="#27333A"/>
+        <path d="M-1.2,-16.4 Q0,-15.4 1.2,-16.4" stroke="#B3364A" stroke-width="0.8" fill="none"/>
+        <path d="M-1.8,-14.4 l1.8,1.2 l1.8,-1.2 l0,2 l-1.8,-1 l-1.8,1 z" fill="#E15A3F"/>
+      </g>
+      <line x1="0" y1="0" x2="0" y2="-17" stroke="#B9BEC0" stroke-width="1"/><circle cx="0" cy="-18" r="1.8" fill="#4B5558"/>
+      <g fill="#FFF3C9" font-family="Inter,sans-serif" font-size="9" font-weight="700"><text x="-3" y="-27">♪${note}</text></g>
+    </g>`;
+  },
+  hans(x, y){
+    const ball = REDUCED_MOTION
+      ? `<circle cx="7" cy="-30" r="3.4" fill="#fff" stroke="#27333A" stroke-width="0.9"/>`
+      : `<g><animateTransform attributeName="transform" type="translate" values="0 14;0 -4;0 14" keyTimes="0;0.5;1" dur="1.6s" repeatCount="indefinite" calcMode="spline" keySplines="0.3 0 0.7 1;0.3 0 0.7 1"/>
+           <circle cx="7" cy="-26" r="3.4" fill="#fff" stroke="#27333A" stroke-width="0.9"/><path d="M7,-28.4 l1.6,1.2 l-0.6,1.9 l-2,0 l-0.6,-1.9 z" fill="#27333A"/></g>`;
+    const kick = REDUCED_MOTION ? '' : `<animateTransform attributeName="transform" type="rotate" values="0 3 -9;-14 3 -9;0 3 -9" dur="1.6s" repeatCount="indefinite"/>`;
+    return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"><title>Hans Van Aken</title>
+      <rect x="-4.6" y="-9" width="3.6" height="9" fill="#F1C9A5"/><rect x="-5" y="-3.6" width="4.4" height="3.6" fill="#1E4DA8"/><rect x="-5.6" y="-0.8" width="5.8" height="1.8" rx="0.8" fill="#27333A"/>
+      <g>${kick}<rect x="1" y="-9" width="3.6" height="9" fill="#F1C9A5"/><rect x="0.8" y="-3.6" width="4.4" height="3.6" fill="#1E4DA8"/><rect x="0.4" y="-0.8" width="5.8" height="1.8" rx="0.8" fill="#27333A"/></g>
+      <rect x="-5.4" y="-13" width="10.8" height="5" rx="1" fill="#1B232B"/>
+      <path d="M-5.6,-21 L5.6,-21 L5.2,-12.6 L-5.2,-12.6 Z" fill="#1E4DA8"/>
+      <path d="M-3.7,-21 v8.4 M-1.8,-21 v8.4 M0,-21 v8.4 M1.8,-21 v8.4 M3.7,-21 v8.4" stroke="#1B232B" stroke-width="1"/>
+      <path d="M-5.6,-20.6 l-3.2,6 l1.8,1 l3.2,-5.2 Z M5.6,-20.6 l3.4,-3.4 l1.4,1.4 l-3.2,5.2 Z" fill="#1E4DA8" stroke="#1B232B" stroke-width="0.5"/>
+      <circle cx="0" cy="-25.2" r="4" fill="#F1C9A5"/>
+      <path d="M-4,-26 C-4,-30.2 4,-30.2 4,-26 C2,-28 -2,-28 -4,-26 Z" fill="#5A3A24"/>
+      <circle cx="-1.3" cy="-25.2" r="0.5" fill="#27333A"/><circle cx="1.5" cy="-25.2" r="0.5" fill="#27333A"/>
+      <path d="M-1.2,-23.4 Q0.2,-22.6 1.6,-23.4" stroke="#B3364A" stroke-width="0.7" fill="none"/>
+      ${ball}
+    </g>`;
+  },
+  dolfijn(x, y, flip, delay){
+    const mv = REDUCED_MOTION ? '' :
+      `<animateTransform attributeName="transform" type="translate" values="0 12;0 -9;0 12" keyTimes="0;0.5;1" dur="2.6s" begin="${delay}s" repeatCount="indefinite" calcMode="spline" keySplines="0.35 0 0.65 1;0.35 0 0.65 1"/>`;
+    return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${flip ? -1 : 1} 1)"><title>Dolfijn</title><g transform="translate(0 ${REDUCED_MOTION ? -6 : 0})">${mv}
+      <g transform="rotate(-18)">
+        <path d="M16,-9 L10,-12 C4,-20 -6,-18 -10,-8 L-17,-11 L-14.5,-4 L-17.5,1 L-9,-2 C-4,0 4,-2 10,-7 Z" fill="#6C8FA8" stroke="#4C6D85" stroke-width="0.8" stroke-linejoin="round"/>
+        <path d="M-9,-2 C-4,0 4,-2 10,-7 L15,-8.4 L10.5,-5 C4,-0.5 -4,1 -9,-2 Z" fill="#DDEAF1"/>
+        <path d="M0,-17 L-3.4,-24 L-5.6,-15.5 Z" fill="#587C95"/>
+        <circle cx="9" cy="-10" r="0.9" fill="#1C2B22"/>
+      </g></g></g>`;
+  }
+};
+
+// kerstverlichting (ketting tussen mast, achtersteven en boeg) + ster in de top
+function christmasLights(cx, mastTop, x0, x1, Dy){
+  const strings = [
+    [cx, mastTop + 8, x0 + 4, Dy - 9],
+    [cx, mastTop + 8, x1 - 2, Dy - 21]
+  ];
+  const cols = ['#E15A3F', '#DDA13B', '#4BA36A', '#4F8FD0'];
+  let s = `<g><title>Kerstverlichting</title>`;
+  let k = 0;
+  strings.forEach(([ax, ay, bx, by]) => {
+    const mx = (ax + bx) / 2, my = (ay + by) / 2 + 14;
+    s += `<path d="M${ax},${ay} Q${mx},${my} ${bx},${by}" fill="none" stroke="#2C6B40" stroke-width="1.2"/>`;
+    for(let i = 1; i <= 7; i++){
+      const t = i / 8, u = 1 - t;
+      const px = u*u*ax + 2*u*t*mx + t*t*bx;
+      const py = u*u*ay + 2*u*t*my + t*t*by;
+      const c = cols[k % cols.length];
+      const tw = REDUCED_MOTION ? '' : `<animate attributeName="opacity" values="1;0.35;1" dur="${(1.4 + (k % 3) * 0.4).toFixed(1)}s" begin="${(k * 0.25).toFixed(2)}s" repeatCount="indefinite"/>`;
+      s += `<circle cx="${px.toFixed(1)}" cy="${(py + 2.6).toFixed(1)}" r="2.5" fill="${c}" stroke="#FFFFFF" stroke-opacity="0.5" stroke-width="0.6">${tw}</circle>`;
+      k++;
+    }
+  });
+  s += `<path d="M${cx},${mastTop - 9} l1.8,4.4 l4.6,0.4 l-3.5,3 l1.1,4.5 l-4,-2.5 l-4,2.5 l1.1,-4.5 l-3.5,-3 l4.6,-0.4 z" fill="#F2C25B" stroke="#C99422" stroke-width="0.6"/>`;
+  s += `</g>`;
+  return s;
+}
+
+function buildBoatSvg(persons, earned){
+  earned = earned || [];
+  const has = id => earned.some(r => r.id === id);
   const VW = 300, cx = 150;
   const AV = 22, PITCH_X = 56, PITCH_Y = 72, MAX_PER_ROW = 5;
   const n = persons.length;
 
-  // personen zo gelijk mogelijk over de rijen verdelen
-  const rowsN = Math.ceil(n / MAX_PER_ROW);
+  // personen zo gelijk mogelijk over de rijen verdelen (ook een lege boot heeft één rij)
+  const rowsN = Math.max(1, Math.ceil(n / MAX_PER_ROW));
   const rowCounts = [];
   let left = n;
   for(let r = 0; r < rowsN; r++){
@@ -1036,7 +1188,7 @@ function buildBoatSvg(persons){
   const mastTop = 12;
   const mastH = 104 + Math.min(3, rowsN - 1) * 18;   // mast groeit mee met de romp
   const Dy = mastTop + mastH;                       // dek-/reling-hoogte
-  const hullH = (rowsN - 1) * PITCH_Y + 14 + AV + 13 + 30;
+  const hullH = (rowsN - 1) * PITCH_Y + 22 + AV + 13 + 30;
   const bottom = Dy + hullH;
   const VH = bottom + 14;
 
@@ -1109,7 +1261,7 @@ function buildBoatSvg(persons){
   // passagiers
   let idx = 0;
   rowCounts.forEach((c, r) => {
-    const cy = Dy + 14 + r * PITCH_Y;
+    const cy = Dy + 22 + r * PITCH_Y;
     for(let k = 0; k < c; k++){
       const person = persons[idx];
       const px = cx + (k - (c - 1) / 2) * PITCH_X;
@@ -1124,7 +1276,18 @@ function buildBoatSvg(persons){
       idx++;
     }
   });
+
+  // verdiende extraatjes (blijvend)
+  const deckY = x => sheerYAt(x, x0, x1, Dy) - 1;
+  if(has('kerst'))   svg += christmasLights(cx, mastTop, x0, x1, Dy);
+  if(has('hans'))    svg += REWARD_ART.hans(cx - 26, deckY(cx - 26));
+  if(has('knut'))    svg += REWARD_ART.knut(x0 + 22, deckY(x0 + 22));
+  if(has('zangers')) svg += REWARD_ART.zangers(cx + 24, deckY(cx + 24));
+  if(has('palm'))    svg += REWARD_ART.palm(x1 - 20, deckY(x1 - 20));
   svg += `</g>`;
+
+  // dolfijnen springen links en rechts uit het water (achter de golven)
+  if(has('dolfijn')){ svg += REWARD_ART.dolfijn(26, wy + 3, false, 0) + REWARD_ART.dolfijn(VW - 26, wy + 3, true, 1.3); }
 
   // water, met een lichtere golflijn bovenop
   svg += `<path d="${wave}" fill="#7FB3CE" fill-opacity="0.82"/>`;
@@ -1137,12 +1300,64 @@ function renderActiveRow(entries){
   const container = document.getElementById('activeRow');
   const activePersons = activePersonsThisWeek(entries);
 
-  if(!activePersons.length){
-    container.innerHTML = '<div class="active-label">mee op reis deze week</div><div class="active-empty">Nog niemand deze week gelogd.</div>';
+  const info = rewardInfo(entries);
+  const earned = info.earned.map(e => e.reward);
+
+  // onderschrift: wat is er al aan boord, en hoe ver is de volgende verrassing
+  let cap = '';
+  if(earned.length) cap += 'Aan boord: ' + earned.map(r => esc(r.title)).join(' · ');
+  if(info.next){
+    cap += (cap ? '<br>' : '') + 'Nog ' + (info.next.reps - info.total) + ' reps tot de volgende verrassing 🎁';
+  }
+  const capHtml = cap ? '<div class="boat-caption">' + cap + '</div>' : '';
+
+  if(!activePersons.length && !earned.length){
+    container.innerHTML = '<div class="active-label">mee op reis deze week</div><div class="active-empty">Nog niemand deze week gelogd.</div>' + capHtml;
     return;
   }
   container.innerHTML =
-    '<div class="active-label">mee op reis deze week</div>' + buildBoatSvg(activePersons);
+    '<div class="active-label">mee op reis deze week</div>' + buildBoatSvg(activePersons, earned) +
+    (activePersons.length ? '' : '<div class="active-empty">Nog niemand deze week gelogd.</div>') + capHtml;
+}
+
+// totaal aantal reps, welke beloningen verdiend zijn en op welke dag elke mijlpaal gehaald werd
+// (afgeleid uit de data zelf, dus op elk toestel gelijk)
+function rewardInfo(entries){
+  const byDate = {};
+  let total = 0;
+  entries.forEach(e => {
+    const r = Number(e.reps) || 0;
+    total += r;
+    byDate[e.date] = (byDate[e.date] || 0) + r;
+  });
+  const earned = [];
+  let cum = 0, ri = 0;
+  Object.keys(byDate).sort().forEach(d => {
+    cum += byDate[d];
+    while(ri < REWARDS.length && cum >= REWARDS[ri].reps){
+      earned.push({ reward: REWARDS[ri], date: d });
+      ri++;
+    }
+  });
+  return { total, earned, next: REWARDS[ri] || null };
+}
+
+function daysSince(ds){
+  const [y, m, d] = String(ds).slice(0, 10).split('-').map(Number);
+  const t = new Date();
+  return Math.round((Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) - Date.UTC(y, m - 1, d)) / 86400000);
+}
+
+function renderRewardBox(entries){
+  const box = document.getElementById('rewardBox');
+  const recent = rewardInfo(entries).earned.filter(e => daysSince(e.date) < REWARD_WINDOW_DAYS);
+  if(!recent.length){ box.style.display = 'none'; box.innerHTML = ''; return; }
+  box.style.display = 'block';
+  box.innerHTML = recent.map(e =>
+    '<div class="reward-card"><div class="reward-kicker">🎉 Proficiat!</div>' +
+    '<div class="reward-title">' + e.reward.reps + ' reps samen bereikt</div>' +
+    '<div class="reward-text">Jullie verdienden: <b>' + esc(e.reward.title) + '</b>. ' + esc(e.reward.text) + ' Kijk maar bij het bootje hieronder.</div></div>'
+  ).join('');
 }
 
 function currentWaypointIndex(km){
@@ -1248,6 +1463,7 @@ function renderAllFromCache(){
   const idx = renderJourney(km);
   renderGlobe(km);
   renderActiveRow(entries);
+  renderRewardBox(entries);
   renderMyChart(entries);
   renderStreaks(entries);
 
