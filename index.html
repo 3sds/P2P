@@ -166,25 +166,7 @@
 
   .active-row{margin:14px 0 4px;}
   .active-label{font-size:0.7rem; color:var(--ink-soft); text-align:center; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:6px;}
-  .boat{position:relative; max-width:340px; margin:0 auto; padding-top:8px;}
-  .boat-body{position:relative; padding:0 14px 14px;}
-  .boat-body::before{
-    content:''; position:absolute; left:0; right:0; top:34px; bottom:0;
-    background:linear-gradient(#8B5A33, #6A4126);
-    border-top:5px solid #C99A62;
-    border-radius:6px 6px 38px 38px;
-    box-shadow:0 2px 0 rgba(0,0,0,0.08);
-  }
-  .boat-items{position:relative; display:flex; flex-wrap:wrap; gap:10px 8px; justify-content:center;}
-  .active-item{display:flex; flex-direction:column; align-items:center; gap:4px; width:60px;}
-  .active-item .avatar-mini{width:46px; height:46px; border:2px solid #F3E7D3;}
-  .active-name{font-size:0.7rem; color:#F3E7D3; text-align:center; line-height:1.15; word-break:break-word;}
-  .boat-flag{position:absolute; top:-6px; right:26px; width:2px; height:40px; background:#6A4126; z-index:2;}
-  .boat-flag::after{content:''; position:absolute; top:0; left:2px; width:16px; height:11px; background:var(--accent); clip-path:polygon(0 0, 100% 50%, 0 100%);}
-  .boat-waves{
-    position:relative; height:10px; margin-top:-6px;
-    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='10' viewBox='0 0 24 10'%3E%3Cpath d='M0 5 Q6 0 12 5 T24 5' fill='none' stroke='rgb(127,179,206)' stroke-width='2.2'/%3E%3C/svg%3E") repeat-x center;
-  }
+  .boat-svg{display:block; width:100%; max-width:340px; margin:0 auto; overflow:visible;}
   .active-empty{font-size:0.78rem; color:var(--ink-soft); text-align:center; margin:8px 0 4px;}
 
   .journey-current{
@@ -193,7 +175,10 @@
   .journey-current .place{font-family:'Fraunces',serif; font-size:1.15rem; font-weight:600;}
   .journey-current .km{font-size:0.8rem; color:var(--ink-soft);}
   .journey-fact{font-size:0.8rem; color:var(--ink); font-style:italic; margin-bottom:6px; line-height:1.4;}
-  .journey-note{font-size:0.82rem; color:var(--ink-soft); margin-bottom:14px;}
+  .journey-note{font-size:0.82rem; color:var(--ink-soft); margin-bottom:8px;}
+  .seg-bar{height:10px; background:#E4E9DC; border-radius:6px; overflow:hidden; margin-bottom:18px;}
+  .seg-fill{height:100%; width:0; background:var(--gold); border-radius:6px; transition:width .4s ease;}
+  .bar-caption{font-size:0.75rem; color:var(--ink-soft); margin-bottom:6px;}
 
   .progress-outer{
     height:10px; background:#E4E9DC; border-radius:6px; overflow:hidden; position:relative;
@@ -286,14 +271,43 @@
     border:4px solid var(--line); border-top-color:var(--ink);
     animation:pu-spin 0.8s linear infinite;
   }
+  .spinner.small{width:16px; height:16px; border-width:2.5px;}
   @keyframes pu-spin{ to{ transform:rotate(360deg); } }
+  .loading-card{
+    background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px 26px 14px; display:flex; flex-direction:column; align-items:center; gap:4px;
+    box-shadow:0 8px 24px rgba(28,43,34,0.10);
+  }
+  .loading-row{display:flex; align-items:center; gap:10px; font-size:0.85rem; color:var(--ink-soft);}
+  .pu-fig{display:block;}
+  @media (prefers-reduced-motion: reduce){ .spinner{animation-duration:2.4s;} }
   .signature{display:flex; justify-content:center; margin-top:10px; opacity:0.45;}
   .signature svg{display:block;}
 </style>
 </head>
 <body>
 
-<div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
+<div id="loadingOverlay" class="loading-overlay" role="status" aria-live="polite">
+  <div class="loading-card">
+<svg class="pu-fig" viewBox="0 0 130 84" width="150" height="97" role="img" aria-label="Even pompen">
+<line x1="4" y1="71.5" x2="126" y2="71.5" stroke="#C9D3BC" stroke-width="2.4" stroke-linecap="round"/>
+<path d="M16.0,68.0 L37.7,59.2" fill="none" stroke="#F2A03D" stroke-width="3.4" stroke-linecap="round"><animate attributeName="d" dur="1.7s" repeatCount="indefinite" values="M16.0,68.0 L37.7,59.2;M16.0,68.0 L37.7,59.2;M16.0,68.0 L37.8,59.5;M16.0,68.0 L37.9,59.8;M16.0,68.0 L38.1,60.3;M16.0,68.0 L38.3,60.9;M16.0,68.0 L38.5,61.5;M16.0,68.0 L38.6,62.1;M16.0,68.0 L38.8,62.7;M16.0,68.0 L38.9,63.2;M16.0,68.0 L39.0,63.5;M16.0,68.0 L39.0,63.8;M16.0,68.0 L39.0,63.8;M16.0,68.0 L39.0,63.8;M16.0,68.0 L39.0,63.5;M16.0,68.0 L38.9,63.2;M16.0,68.0 L38.8,62.7;M16.0,68.0 L38.6,62.1;M16.0,68.0 L38.5,61.5;M16.0,68.0 L38.3,60.9;M16.0,68.0 L38.1,60.3;M16.0,68.0 L37.9,59.8;M16.0,68.0 L37.8,59.5;M16.0,68.0 L37.7,59.2;M16.0,68.0 L37.7,59.2"/></path>
+<path d="M37.7,59.2 L97.5,34.8" fill="none" stroke="#8B4513" stroke-width="19" stroke-linecap="round"><animate attributeName="d" dur="1.7s" repeatCount="indefinite" values="M37.7,59.2 L97.5,34.8;M37.7,59.2 L97.6,35.1;M37.8,59.5 L98.0,35.9;M37.9,59.8 L98.5,37.3;M38.1,60.3 L99.1,39.2;M38.3,60.9 L99.8,41.3;M38.5,61.5 L100.5,43.6;M38.6,62.1 L101.2,45.8;M38.8,62.7 L101.7,48.0;M38.9,63.2 L102.1,49.8;M39.0,63.5 L102.4,51.2;M39.0,63.8 L102.5,52.1;M39.0,63.8 L102.6,52.4;M39.0,63.8 L102.5,52.1;M39.0,63.5 L102.4,51.2;M38.9,63.2 L102.1,49.8;M38.8,62.7 L101.7,48.0;M38.6,62.1 L101.2,45.8;M38.5,61.5 L100.5,43.6;M38.3,60.9 L99.8,41.3;M38.1,60.3 L99.1,39.2;M37.9,59.8 L98.5,37.3;M37.8,59.5 L98.0,35.9;M37.7,59.2 L97.6,35.1;M37.7,59.2 L97.5,34.8"/></path>
+<path d="M40.4,54.8 L94.7,32.7" fill="none" stroke="#C98A4B" stroke-width="5" stroke-linecap="round" opacity="0.9"><animate attributeName="d" dur="1.7s" repeatCount="indefinite" values="M40.4,54.8 L94.7,32.7;M40.5,54.9 L94.8,33.0;M40.6,55.2 L95.2,33.8;M40.7,55.6 L95.7,35.2;M40.9,56.1 L96.3,36.9;M41.2,56.8 L97.0,39.0;M41.4,57.5 L97.7,41.2;M41.5,58.1 L98.3,43.4;M41.7,58.8 L98.8,45.4;M41.8,59.3 L99.2,47.2;M41.9,59.8 L99.4,48.6;M42.0,60.0 L99.6,49.4;M42.0,60.1 L99.6,49.7;M42.0,60.0 L99.6,49.4;M41.9,59.8 L99.4,48.6;M41.8,59.3 L99.2,47.2;M41.7,58.8 L98.8,45.4;M41.5,58.1 L98.3,43.4;M41.4,57.5 L97.7,41.2;M41.2,56.8 L97.0,39.0;M40.9,56.1 L96.3,36.9;M40.7,55.6 L95.7,35.2;M40.6,55.2 L95.2,33.8;M40.5,54.9 L94.8,33.0;M40.4,54.8 L94.7,32.7"/></path>
+<g><animateTransform attributeName="transform" type="translate" dur="1.7s" repeatCount="indefinite" values="0.0 0.0;0.1 0.3;0.5 1.2;1.0 2.6;1.7 4.5;2.4 6.7;3.1 9.0;3.8 11.3;4.3 13.5;4.7 15.4;5.0 16.8;5.2 17.7;5.2 18.0;5.2 17.7;5.0 16.8;4.7 15.4;4.3 13.5;3.8 11.3;3.1 9.0;2.4 6.7;1.7 4.5;1.0 2.6;0.5 1.2;0.1 0.3;0.0 0.0"/>
+  <g transform="translate(108.3 25.0)">
+    <path d="M-3,-10 L0,-17 L3,-11 L6,-16 L8,-8 Z" fill="#E15A3F"/>
+    <circle r="11" fill="#fff" stroke="#FF6B6B" stroke-width="1.6"/>
+    <path d="M9,-1 L17,2 L9,5 Z" fill="#FFA500"/>
+    <circle cx="3.6" cy="-2.2" r="1.7" fill="#1C2B22"/>
+  </g>
+</g>
+<path d="M97.5,35.8 L95.4,51.6 L100.0,68.0" fill="none" stroke="#FFA500" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"><animate attributeName="d" dur="1.7s" repeatCount="indefinite" values="M97.5,35.8 L95.4,51.6 L100.0,68.0;M97.6,36.1 L94.8,51.8 L100.0,68.0;M98.0,36.9 L93.4,52.3 L100.0,68.0;M98.5,38.3 L91.9,53.0 L100.0,68.0;M99.1,40.2 L90.6,53.8 L100.0,68.0;M99.8,42.3 L89.4,54.7 L100.0,68.0;M100.5,44.6 L88.5,55.5 L100.0,68.0;M101.2,46.8 L87.7,56.2 L100.0,68.0;M101.7,49.0 L87.2,56.8 L100.0,68.0;M102.1,50.8 L86.8,57.3 L100.0,68.0;M102.4,52.2 L86.6,57.5 L100.0,68.0;M102.5,53.1 L86.5,57.7 L100.0,68.0;M102.6,53.4 L86.5,57.7 L100.0,68.0;M102.5,53.1 L86.5,57.7 L100.0,68.0;M102.4,52.2 L86.6,57.5 L100.0,68.0;M102.1,50.8 L86.8,57.3 L100.0,68.0;M101.7,49.0 L87.2,56.8 L100.0,68.0;M101.2,46.8 L87.7,56.2 L100.0,68.0;M100.5,44.6 L88.5,55.5 L100.0,68.0;M99.8,42.3 L89.4,54.7 L100.0,68.0;M99.1,40.2 L90.6,53.8 L100.0,68.0;M98.5,38.3 L91.9,53.0 L100.0,68.0;M98.0,36.9 L93.4,52.3 L100.0,68.0;M97.6,36.1 L94.8,51.8 L100.0,68.0;M97.5,35.8 L95.4,51.6 L100.0,68.0"/></path>
+<circle cx="100.0" cy="68.0" r="2.9" fill="#FFA500"/>
+</svg>
+    <div class="loading-row"><div class="spinner small"></div><span>Even pompen…</span></div>
+  </div>
+</div>
 
 <div id="gate">
   <div class="card">
@@ -372,6 +386,8 @@
       </div>
       <div class="journey-fact" id="journeyFact"></div>
       <div class="journey-note" id="journeyNote"></div>
+      <div class="seg-bar" role="progressbar" aria-label="Voortgang huidig traject" aria-valuemin="0" aria-valuemax="100" id="segBar"><div class="seg-fill" id="segFill"></div></div>
+      <div class="bar-caption" id="totalCaption"></div>
       <div class="progress-outer"><div class="progress-inner" id="progressInner"></div></div>
       <div class="route-list" id="routeList"></div>
     </div>
@@ -393,7 +409,7 @@
       <div id="streakList"></div>
     </div>
 
-    <footer>Km = (aantal mensen dat die dag pompte) × (som van alle reps die dag).<br>Route: Nordkapp → Zuidpool → Zuid-Amerika → Noord-Amerika → terug naar Nordkapp, ± <span id="routeTotalLabel"></span> km.
+    <footer>Km = (aantal mensen dat die dag pompte) × (som van alle reps die dag).
       <div class="signature">
         <svg viewBox="130 40 260 400" width="16" height="25">
           <circle cx="256" cy="140" r="80" fill="#fff" stroke="#ff6b6b" stroke-width="8"/>
@@ -487,7 +503,6 @@ function getAvatarForPerson(person){
   return p ? p.avatar : null;
 }
 
-document.getElementById('routeTotalLabel').textContent = ROUTE_TOTAL.toLocaleString('nl-BE');
 
 function dateStrOffset(offsetDays){
   const d = new Date();
@@ -893,6 +908,7 @@ function renderStreaks(entries){
     person: p,
     best: longestStreak(entries.filter(e => e.person === p).map(e => e.date))
   }));
+  rows.sort((a, b) => b.best - a.best || a.person.localeCompare(b.person, 'nl'));
   const max = Math.max(1, ...rows.map(r => r.best));
   box.innerHTML = rows.map(r => {
     const av = getAvatarForPerson(r.person);
@@ -900,7 +916,7 @@ function renderStreaks(entries){
       ? '<img class="avatar-mini" src="' + av + '" alt="">'
       : '<span class="avatar-mini" style="display:inline-block;background:var(--line);"></span>';
     return '<div class="streak-row">' + img +
-      '<div class="streak-name">' + r.person + '</div>' +
+      '<div class="streak-name">' + esc(r.person) + '</div>' +
       '<div class="streak-track"><div class="streak-fill" style="width:' + Math.round(r.best / max * 100) + '%"></div></div>' +
       '<div class="streak-val">' + r.best + (r.best === 1 ? ' dag' : ' dagen') + '</div></div>';
   }).join('');
@@ -992,6 +1008,131 @@ function renderMyChart(entries){
     '</table>';
 }
 
+const REDUCED_MOTION = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+if(REDUCED_MOTION){ document.querySelectorAll('.pu-fig').forEach(el => { if(el.pauseAnimations) el.pauseAnimations(); }); }
+
+function esc(str){
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function buildBoatSvg(persons){
+  const VW = 300, cx = 150;
+  const AV = 22, PITCH_X = 56, PITCH_Y = 72, MAX_PER_ROW = 5;
+  const n = persons.length;
+
+  // personen zo gelijk mogelijk over de rijen verdelen
+  const rowsN = Math.ceil(n / MAX_PER_ROW);
+  const rowCounts = [];
+  let left = n;
+  for(let r = 0; r < rowsN; r++){
+    const c = Math.ceil(left / (rowsN - r));
+    rowCounts.push(c);
+    left -= c;
+  }
+  const widest = Math.max(...rowCounts);
+
+  const hullW = Math.min(292, Math.max(160, widest * PITCH_X + 52));
+  const x0 = cx - hullW / 2, x1 = cx + hullW / 2;
+  const mastTop = 12;
+  const mastH = 104 + Math.min(3, rowsN - 1) * 18;   // mast groeit mee met de romp
+  const Dy = mastTop + mastH;                       // dek-/reling-hoogte
+  const hullH = (rowsN - 1) * PITCH_Y + 14 + AV + 13 + 30;
+  const bottom = Dy + hullH;
+  const VH = bottom + 14;
+
+  const mainW = Math.min(104, hullW * 0.36);
+  const jibW = mainW * 0.68;
+  const sailBase = Dy - 12;
+
+  // reling (bovenrand van de romp): achtersteven laag, boeg hoger opgetild
+  const sheer = `M${x0},${Dy - 6} C${x0 + hullW * 0.30},${Dy + 4} ${x0 + hullW * 0.68},${Dy + 4} ${x1},${Dy - 16}`;
+  const hullPath = sheer +
+    ` C${x1 - 3},${Dy + hullH * 0.42} ${x1 - 26},${Dy + hullH} ${x1 - 58},${Dy + hullH}` +
+    ` L${x0 + 46},${Dy + hullH}` +
+    ` C${x0 + 14},${Dy + hullH} ${x0 + 3},${Dy + hullH * 0.5} ${x0},${Dy - 6} Z`;
+
+  // zeilen met een lichte buik
+  const mainA = [cx - 3, mastTop + 14];
+  const mainSail = `M${mainA[0]},${mainA[1]} Q${mainA[0] - mainW * 0.62},${mainA[1] + (sailBase - mainA[1]) * 0.30} ${mainA[0] - mainW},${sailBase} L${mainA[0]},${sailBase} Z`;
+  const jibA = [cx + 4, mastTop + 30];
+  const jibSail = `M${jibA[0]},${jibA[1]} Q${jibA[0] + jibW * 0.62},${jibA[1] + (sailBase - jibA[1]) * 0.34} ${jibA[0] + jibW},${sailBase} L${jibA[0]},${sailBase} Z`;
+
+  // wimpel: groot genoeg om op te vallen, wappert naar achteren
+  const fy = mastTop - 1;
+  const flagPts = [
+    `${cx},${fy} ${cx - 40},${fy + 7} ${cx},${fy + 15}`,
+    `${cx},${fy} ${cx - 36},${fy + 4} ${cx},${fy + 15}`,
+    `${cx},${fy} ${cx - 41},${fy + 9} ${cx},${fy + 15}`,
+    `${cx},${fy} ${cx - 40},${fy + 7} ${cx},${fy + 15}`
+  ].join(';');
+
+  // water
+  const wy = bottom - 12;
+  let wave = `M-20,${wy}`;
+  for(let x = -20; x < VW + 20; x += 36){
+    wave += ` q9,-8 18,0 t18,0`;
+  }
+  wave += ` L${VW + 24},${VH + 4} L-20,${VH + 4} Z`;
+
+  let svg = `<svg class="boat-svg" viewBox="0 0 ${VW} ${VH}" role="img" aria-label="Boot met ${n} reisgenoten">`;
+  svg += `<defs>
+    <linearGradient id="hullGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#93603A"/><stop offset="1" stop-color="#5C3920"/></linearGradient>
+    <clipPath id="hullClip"><path d="${hullPath}"/></clipPath>`;
+  persons.forEach((_, i) => { svg += `<clipPath id="avc${i}"><circle r="${AV}"/></clipPath>`; });
+  svg += `</defs>`;
+
+  svg += `<g>`;
+  if(!REDUCED_MOTION){
+    svg += `<animateTransform attributeName="transform" type="translate" values="0 0;0 2.2;0 0" dur="3.6s" repeatCount="indefinite"/>`;
+  }
+
+  // mast, giek, zeilen, stag
+  svg += `<line x1="${cx + 4}" y1="${mastTop + 3}" x2="${x1 - 14}" y2="${Dy - 17}" stroke="#6A4126" stroke-width="1.2"/>`;
+  svg += `<path d="${mainSail}" fill="#FBF6EA" stroke="#D5C7A6" stroke-width="1.2" stroke-linejoin="round"/>`;
+  svg += `<path d="${jibSail}" fill="#F1E7CF" stroke="#D5C7A6" stroke-width="1.2" stroke-linejoin="round"/>`;
+  svg += `<path d="M${mainA[0]},${mainA[1] + 34} L${mainA[0] - mainW * 0.62},${sailBase - 6}" stroke="#E3D7BA" stroke-width="1" fill="none"/>`;
+  svg += `<line x1="${cx - 3}" y1="${sailBase}" x2="${cx - 3 - mainW - 2}" y2="${sailBase}" stroke="#6A4126" stroke-width="2.6" stroke-linecap="round"/>`;
+  svg += `<line x1="${cx}" y1="${mastTop}" x2="${cx}" y2="${Dy + 6}" stroke="#6A4126" stroke-width="4" stroke-linecap="round"/>`;
+  svg += `<circle cx="${cx}" cy="${mastTop}" r="3.4" fill="#DDA13B"/>`;
+  svg += `<polygon fill="#E15A3F" points="${flagPts.split(';')[0]}">` +
+    (REDUCED_MOTION ? '' : `<animate attributeName="points" dur="1.8s" repeatCount="indefinite" values="${flagPts}"/>`) +
+    `</polygon>`;
+
+  // romp
+  svg += `<path d="${hullPath}" fill="url(#hullGrad)"/>`;
+  svg += `<g clip-path="url(#hullClip)">` +
+    `<path d="${sheer}" transform="translate(0 11)" fill="none" stroke="#E15A3F" stroke-width="3.2"/>` +
+    `<path d="${sheer}" transform="translate(0 ${hullH * 0.62})" fill="none" stroke="#4A2C18" stroke-opacity="0.35" stroke-width="1.2"/>` +
+    `</g>`;
+  svg += `<path d="${sheer}" fill="none" stroke="#EBD3A6" stroke-width="5" stroke-linecap="round"/>`;
+
+  // passagiers
+  let idx = 0;
+  rowCounts.forEach((c, r) => {
+    const cy = Dy + 14 + r * PITCH_Y;
+    for(let k = 0; k < c; k++){
+      const person = persons[idx];
+      const px = cx + (k - (c - 1) / 2) * PITCH_X;
+      const av = getAvatarForPerson(person);
+      const label = person.length > 9 ? person.slice(0, 8) + '…' : person;
+      svg += `<g transform="translate(${px.toFixed(1)} ${cy})"><title>${esc(person)}</title>`;
+      svg += av
+        ? `<g clip-path="url(#avc${idx})"><image href="${esc(av)}" x="${-AV}" y="${-AV}" width="${AV * 2}" height="${AV * 2}" preserveAspectRatio="xMidYMid slice"/></g>`
+        : `<circle r="${AV}" fill="#D7DECB"/>`;
+      svg += `<circle r="${AV}" fill="none" stroke="#F3E7D3" stroke-width="2.4"/>`;
+      svg += `<text y="${AV + 14}" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" font-weight="600" fill="#F6ECDA">${esc(label)}</text></g>`;
+      idx++;
+    }
+  });
+  svg += `</g>`;
+
+  // water, met een lichtere golflijn bovenop
+  svg += `<path d="${wave}" fill="#7FB3CE" fill-opacity="0.82"/>`;
+  svg += `<path d="${wave.split(' L')[0]}" fill="none" stroke="#B9DAEA" stroke-width="2"/>`;
+  svg += `</svg>`;
+  return svg;
+}
+
 function renderActiveRow(entries){
   const container = document.getElementById('activeRow');
   const activePersons = activePersonsThisWeek(entries);
@@ -1000,20 +1141,8 @@ function renderActiveRow(entries){
     container.innerHTML = '<div class="active-label">mee op reis deze week</div><div class="active-empty">Nog niemand deze week gelogd.</div>';
     return;
   }
-  const itemsHtml = activePersons.map(p => {
-    const av = getAvatarForPerson(p);
-    const img = av
-      ? '<img class="avatar-mini" src="' + av + '" alt="">'
-      : '<span class="avatar-mini" style="display:inline-block;background:var(--line);"></span>';
-    return '<div class="active-item">' + img + '<div class="active-name">' + p + '</div></div>';
-  }).join('');
   container.innerHTML =
-    '<div class="active-label">mee op reis deze week</div>' +
-    '<div class="boat">' +
-      '<div class="boat-flag"></div>' +
-      '<div class="boat-body"><div class="boat-items">' + itemsHtml + '</div></div>' +
-      '<div class="boat-waves"></div>' +
-    '</div>';
+    '<div class="active-label">mee op reis deze week</div>' + buildBoatSvg(activePersons);
 }
 
 function currentWaypointIndex(km){
@@ -1039,7 +1168,7 @@ function renderDayBlocks(entries){
           const imgHtml = av
             ? '<img class="avatar-mini" src="' + av + '" alt="">'
             : '<span class="avatar-mini" style="display:inline-block;background:var(--line);"></span>';
-          return '<span class="who-chip">' + imgHtml + p.person + ' (' + p.reps + ')</span>';
+          return '<span class="who-chip">' + imgHtml + esc(p.person) + ' (' + p.reps + ')</span>';
         }).join('')
       : '<span class="who-empty">nog niemand</span>';
     block.innerHTML =
@@ -1066,16 +1195,23 @@ function renderJourney(km){
   }
 
   const noteEl = document.getElementById('journeyNote');
+  let segPct = 0;
   if(km >= ROUTE_TOTAL){
+    segPct = 100;
     noteEl.textContent = 'Jullie zijn de hele wereld rond geweest, van de Nordkapp terug tot de Nordkapp. 🎉';
   } else if(next){
     const span = next.km - current.km;
     const into = km - current.km;
     const pct = span > 0 ? Math.round((into/span)*100) : 0;
+    segPct = span > 0 ? Math.min(100, (into/span)*100) : 0;
     noteEl.textContent = 'Onderweg van ' + current.name.split(',')[0] + ' naar ' + next.name.split(',')[0] + ' — ' + pct + '% van dat stuk.';
   }
 
-  document.getElementById('progressInner').style.width = Math.min(100, (km/ROUTE_TOTAL)*100) + '%';
+  document.getElementById('segFill').style.width = segPct + '%';
+  document.getElementById('segBar').setAttribute('aria-valuenow', Math.round(segPct));
+  const totalPct = Math.min(100, (km/ROUTE_TOTAL)*100);
+  document.getElementById('totalCaption').textContent = 'Hele reis · ' + totalPct.toLocaleString('nl-BE', {maximumFractionDigits: 1}) + '%';
+  document.getElementById('progressInner').style.width = totalPct + '%';
   document.getElementById('totalKm').textContent = km;
 
   const listEl = document.getElementById('routeList');
