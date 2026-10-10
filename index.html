@@ -1306,7 +1306,7 @@ function renderActiveRow(entries){
   // onderschrift: wat is er al aan boord, en hoe ver is de volgende verrassing
   let cap = '';
   if(earned.length) cap += 'Aan boord: ' + earned.map(r => esc(r.title)).join(' · ');
-  if(info.next){
+  if(info.next && info.total >= 1000){
     cap += (cap ? '<br>' : '') + 'Nog ' + (info.next.reps - info.total) + ' reps tot de volgende verrassing 🎁';
   }
   const capHtml = cap ? '<div class="boat-caption">' + cap + '</div>' : '';
