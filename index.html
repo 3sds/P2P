@@ -121,7 +121,26 @@
     font-size:1.1rem; text-align:center; font-family:'Inter',sans-serif;
   }
   .today .btn{margin-top:0; flex:1;}
+  .setsWrap{display:flex; gap:8px; flex:0 0 auto;}
+  .set-cell{display:flex; flex-direction:column; gap:3px; min-width:0;}
+  .set-cell span{font-size:0.68rem; color:var(--ink-soft); text-align:center;}
+  .repsRow.multi{flex-direction:column; align-items:stretch;}
+  .repsRow.multi .setsWrap{width:100%;}
+  .repsRow.multi .set-cell{flex:1;}
+  .repsRow.multi .set-cell input{width:100%; padding:10px 4px;}
   .today .btn.done{background:var(--done);}
+  .del-btn{background:none; border:none; color:var(--ink-soft); text-decoration:underline; font-size:0.78rem; cursor:pointer; padding:0; margin-top:8px;}
+  .mode-toggle{display:flex; gap:6px; margin-top:12px;}
+  .mode-toggle button{flex:1; padding:7px; border-radius:10px; border:1px solid var(--line); background:#fff; font-family:'Inter',sans-serif; font-weight:600; font-size:0.8rem; cursor:pointer;}
+  .mode-toggle button.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+  .news-card{position:relative; background:linear-gradient(135deg,#E8F3EC,#D5EAD9); border:1px solid #A9CFB4; border-radius:14px; padding:14px 38px 14px 16px; margin-bottom:12px;}
+  .news-kicker{font-size:0.72rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--done);}
+  .news-card ul{margin:6px 0 0; padding-left:18px;}
+  .news-card li{font-size:0.86rem; line-height:1.45; color:var(--ink); margin-bottom:3px;}
+  .news-close{position:absolute; top:8px; right:10px; background:none; border:none; font-size:1.2rem; line-height:1; color:var(--ink-soft); cursor:pointer;}
+  .sets-pick-row{display:flex; gap:8px; margin-top:14px;}
+  .sets-pick-row button{flex:1; padding:14px 0; border-radius:12px; border:1px solid var(--line); background:#fff; font-family:'Fraunces',serif; font-size:1.3rem; font-weight:700; cursor:pointer;}
+  .sets-pick-row button.selected{background:var(--ink); color:var(--paper); border-color:var(--ink);}
   .status{font-size:0.85rem; color:var(--ink-soft); margin-top:10px;}
   .todayHint{font-size:0.78rem; color:var(--ink-soft); margin-top:8px; line-height:1.4;}
 
@@ -347,10 +366,12 @@
         <div class="whoami-actions">
           <button onclick="switchPerson()">wissel</button>
           <button onclick="renderAvatarPicker()">avatar</button>
+          <button onclick="renderSetsPicker()">reeksen</button>
         </div>
       </div>
     </div>
 
+    <div id="newsBox" style="display:none;"></div>
     <div id="rewardBox" style="display:none;"></div>
     <div class="milestone" id="milestone"></div>
 
@@ -360,11 +381,12 @@
         <button id="btnToday" class="active" onclick="setOffset(0)">Vandaag</button>
         <button id="btnYesterday" onclick="setOffset(1)">Gisteren</button>
       </div>
-      <div class="repsRow">
-        <input type="number" id="repsInput" value="10" min="1">
+      <div class="repsRow" id="repsRow">
+        <div class="setsWrap" id="setsWrap"></div>
         <button class="btn" id="logBtn" onclick="logSelected()">Ik heb gepompt</button>
       </div>
       <div class="status" id="todayStatus"></div>
+      <button class="del-btn" id="delBtn" style="display:none;" onclick="deleteLog()">Wis mijn log</button>
     </div>
 
     <div class="card">
@@ -410,7 +432,11 @@
 
     <div class="card">
       <h3>Mijn stats</h3>
-      <div class="stats-sub">Reps per dag, laatste 30 dagen</div>
+      <div class="mode-toggle" id="modeToggle" style="display:none;">
+        <button id="modeMax" class="active" onclick="setChartMode('max')">Maximum</button>
+        <button id="modeTotal" onclick="setChartMode('total')">Totaal</button>
+      </div>
+      <div class="stats-sub" id="daySub">Reps per dag, laatste 30 dagen</div>
       <div class="chart-box" id="myChart"></div>
       <div class="chart-summary" id="chartSummary"></div>
       <details class="chart-table">
@@ -419,7 +445,7 @@
       </details>
 
       <div class="wk-block">
-        <div class="stats-sub" style="margin-top:0;">Gemiddelde reps per dag, per week (ma–zo)</div>
+        <div class="stats-sub" style="margin-top:0;" id="weekSub">Gemiddelde reps per dag, per week (ma–zo)</div>
         <div class="chart-box" id="weekChart"></div>
         <div class="chart-summary" id="weekSummary"></div>
       </div>
@@ -431,7 +457,7 @@
       <div id="streakList"></div>
     </div>
 
-    <footer>Km = (aantal mensen dat die dag pompte) × (som van alle reps die dag).
+    <footer>Km = (aantal mensen dat die dag pompte) × (som van ieders grootste reeks die dag).
       <div class="signature">
         <svg viewBox="130 40 260 400" width="16" height="25">
           <circle cx="256" cy="140" r="80" fill="#fff" stroke="#ff6b6b" stroke-width="8"/>
@@ -514,6 +540,28 @@ let key = null;
 let logOffset = 0; // 0 = vandaag, 1 = gisteren
 let cachedEntries = [];
 let cachedProfiles = [];
+let backendV2 = false;      // false zolang Code.gs nog niet is bijgewerkt (reeksen/wissen werken dan niet)
+let chartMode = 'max';      // grafieken: 'max' (grootste reeks) of 'total'
+
+/* Reeksen: e.reps = totaal van de dag, e.sets = losse reeksen, e.max = grootste reeks (telt voor km).
+   Oudere logs hebben geen reeksen: daar geldt reps als één reeks. */
+function parseSets(raw, total){
+  const arr = String(raw == null ? '' : raw).split(/[|;,]/).map(x => Number(x.trim())).filter(n => n > 0 && isFinite(n));
+  return arr.length ? arr : (total > 0 ? [total] : []);
+}
+function normalizeEntry(e){
+  const reps = Number(e.reps) || 0;
+  const sets = parseSets(e.sets, reps);
+  return Object.assign({}, e, { reps, sets, max: sets.length ? Math.max(...sets) : reps, multi: sets.length > 1 });
+}
+function getSetCount(person){
+  const p = cachedProfiles.find(x => x.person === person);
+  let n = p && Number(p.setCount);
+  if(!(n >= 1 && n <= 5)){
+    try{ n = Number(localStorage.getItem('pushup_setcount_' + person)); }catch(e){ n = 0; }
+  }
+  return n >= 1 && n <= 5 ? Math.round(n) : 1;
+}
 const AVATAR_COUNT = 32;
 
 function avatarPath(n){
@@ -599,8 +647,9 @@ async function apiPost(payload){
 async function loadData(){
   const data = await apiGet();
   if(data.error) throw new Error(data.error);
-  cachedEntries = data.entries || [];
+  cachedEntries = (data.entries || []).map(normalizeEntry);
   cachedProfiles = data.profiles || [];
+  backendV2 = Number(data.version) >= 2;
 }
 
 function showAppView(){
@@ -608,6 +657,8 @@ function showAppView(){
   if(np) np.remove();
   const ap = document.getElementById('avatarPick');
   if(ap) ap.remove();
+  const sp = document.getElementById('setsPick');
+  if(sp) sp.remove();
   document.getElementById('app').style.display = 'block';
 }
 
@@ -739,17 +790,44 @@ function setOffset(offset){
 function updateLogFormState(){
   const ds = dateStrOffset(logOffset);
   const mine = cachedEntries.filter(e => e.person === me && e.date === ds);
-  if(mine.length){
-    document.getElementById('repsInput').value = mine[0].reps;
+  const existing = mine.length ? mine[0] : null;
+  buildSetFields(existing);
+  const when = logOffset === 0 ? 'vandaag' : 'gisteren';
+  document.getElementById('delBtn').style.display = existing ? 'inline-block' : 'none';
+  if(existing){
     document.getElementById('logBtn').classList.add('done');
     document.getElementById('logBtn').textContent = 'Aangepast, nog eens opslaan';
-    document.getElementById('todayStatus').textContent = 'Al gelogd voor ' + (logOffset === 0 ? 'vandaag' : 'gisteren') + ' — mag alsnog aanpassen.';
+    document.getElementById('todayStatus').textContent = 'Al gelogd voor ' + when + ' — mag alsnog aanpassen.';
   } else {
-    document.getElementById('repsInput').value = 10;
     document.getElementById('logBtn').classList.remove('done');
     document.getElementById('logBtn').textContent = 'Ik heb gepompt';
     document.getElementById('todayStatus').textContent = '';
   }
+}
+
+// invulvelden voor de reeksen: je profiel bepaalt het aantal (1-5); een bestaande log met meer reeksen toont er genoeg
+function buildSetFields(existing){
+  const wrap = document.getElementById('setsWrap');
+  const N = Math.min(5, Math.max(getSetCount(me), existing ? existing.sets.length : 0));
+  const vals = [];
+  for(let i = 0; i < N; i++){
+    vals.push(existing ? (existing.sets[i] != null ? existing.sets[i] : '') : 10);
+  }
+  document.getElementById('repsRow').classList.toggle('multi', N > 1);
+  wrap.innerHTML = vals.map((v, i) =>
+    '<label class="set-cell">' + (N > 1 ? '<span>reeks ' + (i + 1) + '</span>' : '') +
+    '<input type="number" inputmode="numeric" class="set-field" min="1" max="5000" value="' + v + '"' + (existing ? ' data-touched="1"' : '') + '></label>'
+  ).join('');
+  const fields = [...wrap.querySelectorAll('.set-field')];
+  fields.forEach((f, i) => {
+    f.addEventListener('input', () => {
+      f.dataset.touched = '1';
+      // één waarde invullen = de volgende, nog niet aangeraakte velden nemen dezelfde waarde over
+      for(let j = i + 1; j < fields.length; j++){
+        if(!fields[j].dataset.touched) fields[j].value = f.value;
+      }
+    });
+  });
 }
 
 /* Streak met freezes: de geschiedenis wordt dag voor dag afgespeeld (dus op elk toestel gelijk, zonder extra opslag).
@@ -776,13 +854,14 @@ function streakInfo(dates, todayStr){
   return { current: run, best, freezes, frozenYesterday };
 }
 
-// Voor een dag: multiplier = aantal deelnemers die dag, km = multiplier x som reps
+// km voor een dag = aantal deelnemers x som van ieders GROOTSTE reeks; het totaal aantal reps telt voor de beloningen
 function computeDayStats(entries, dateStr){
   const dayEntries = entries.filter(e => e.date === dateStr);
   const n = dayEntries.length;
-  const s = dayEntries.reduce((sum, e) => sum + (Number(e.reps) || 0), 0);
+  const s = dayEntries.reduce((sum, e) => sum + (Number(e.max != null ? e.max : e.reps) || 0), 0);
+  const total = dayEntries.reduce((sum, e) => sum + (Number(e.reps) || 0), 0);
   const multiplier = n > 0 ? n : 1;
-  return { persons: dayEntries, n, s, multiplier, km: multiplier * s };
+  return { persons: dayEntries, n, s, total, multiplier, km: multiplier * s };
 }
 
 function computeWorldKm(entries){
@@ -943,6 +1022,29 @@ function renderStreaks(entries){
   }).join('');
 }
 
+function chartVal(e){
+  return (chartMode === 'total' ? e.reps : (e.max != null ? e.max : e.reps)) || 0;
+}
+
+function setChartMode(m){
+  chartMode = m;
+  renderChartsBlock(cachedEntries);
+}
+
+function renderChartsBlock(entries){
+  const mine = entries.filter(e => e.person === me);
+  const split = mine.some(e => e.multi);          // alleen splitsen zodra jij ooit meer dan één reeks op een dag logde
+  if(!split) chartMode = 'max';
+  document.getElementById('modeToggle').style.display = split ? 'flex' : 'none';
+  document.getElementById('modeMax').classList.toggle('active', chartMode === 'max');
+  document.getElementById('modeTotal').classList.toggle('active', chartMode === 'total');
+  const suffix = split ? (chartMode === 'max' ? ' (grootste reeks)' : ' (totaal)') : '';
+  document.getElementById('daySub').textContent = 'Reps per dag, laatste 30 dagen' + suffix;
+  document.getElementById('weekSub').textContent = 'Gemiddelde reps per dag, per week (ma–zo)' + suffix;
+  renderMyChart(entries);
+  renderWeekChart(entries);
+}
+
 function renderMyChart(entries){
   const W = 340, H = 180, L = 30, R = 8, T = 16, B = 26;
   const plotW = W - L - R, plotH = H - T - B;
@@ -952,7 +1054,7 @@ function renderMyChart(entries){
   for(let i = N - 1; i >= 0; i--) days.push(dateStrOffset(i));
   const perDay = {};
   entries.filter(e => e.person === me).forEach(e => {
-    perDay[e.date] = (perDay[e.date] || 0) + (Number(e.reps) || 0);
+    perDay[e.date] = (perDay[e.date] || 0) + chartVal(e);
   });
   const vals = days.map(d => perDay[d] || 0);
   const maxV = Math.max(...vals);
@@ -1034,7 +1136,7 @@ function renderWeekChart(entries){
   const summary = document.getElementById('weekSummary');
   const perDay = {};
   entries.filter(e => e.person === me).forEach(e => {
-    perDay[e.date] = (perDay[e.date] || 0) + (Number(e.reps) || 0);
+    perDay[e.date] = (perDay[e.date] || 0) + chartVal(e);
   });
   const dates = Object.keys(perDay).sort();
   // einddag: gisteren, of eergisteren als er voor gisteren nog niet gelogd is (vandaag is nog niet voorbij)
@@ -1504,13 +1606,13 @@ function renderDayBlocks(entries){
           const imgHtml = av
             ? '<img class="avatar-mini" src="' + av + '" alt="">'
             : '<span class="avatar-mini" style="display:inline-block;background:var(--line);"></span>';
-          return '<span class="who-chip">' + imgHtml + esc(p.person) + ' (' + p.reps + ')</span>';
+          return '<span class="who-chip">' + imgHtml + esc(p.person) + ' (' + (p.multi ? p.reps + ', max ' + p.max : p.reps) + ')</span>';
         }).join('')
       : '<span class="who-empty">nog niemand</span>';
     block.innerHTML =
       '<div class="head"><span>' + label + '</span><span class="km">' + stats.km + ' km</span></div>' +
       '<div class="who">' + who + '</div>' +
-      '<div class="formula">' + stats.multiplier + ' × ' + stats.s + ' = ' + stats.km + ' km' + (offset === 1 ? ' (nog aan te vullen tot vandaag)' : '') + '</div>';
+      '<div class="formula">' + stats.multiplier + ' × ' + stats.s + ' = ' + stats.km + ' km' + (stats.total !== stats.s ? ' · ' + stats.total + ' reps in totaal' : '') + (offset === 1 ? ' (nog aan te vullen tot vandaag)' : '') + '</div>';
     container.appendChild(block);
   });
 }
@@ -1604,9 +1706,9 @@ function renderAllFromCache(){
   renderGlobe(km);
   renderActiveRow(entries);
   renderRewardBox(entries);
-  renderMyChart(entries);
-  renderWeekChart(entries);
+  renderChartsBlock(entries);
   renderStreaks(entries);
+  renderNews();
 
   const milestoneEl = document.getElementById('milestone');
   const arrived = idx > 0 ? arrivalDate(entries, ROUTE[idx].km) : null;
@@ -1630,17 +1732,107 @@ async function refresh(){
 }
 
 async function logSelected(){
-  const reps = Number(document.getElementById('repsInput').value) || 10;
   const ds = dateStrOffset(logOffset);
+  const sets = [...document.querySelectorAll('#setsWrap .set-field')]
+    .map(f => Math.round(Number(f.value))).filter(n => n > 0);
+  const status = document.getElementById('todayStatus');
+  if(!sets.length){ status.textContent = 'Vul minstens één reeks in.'; return; }
+  if(sets.some(n => n > 5000)){ status.textContent = 'Een reeks van meer dan 5000? Dat lijkt een tikfout.'; return; }
+  if(sets.length > 1 && !backendV2){
+    status.textContent = 'Reeksen opslaan werkt pas nadat de nieuwe Code.gs is geplakt en uitgerold (zie de handleiding).';
+    return;
+  }
+  const reps = sets.reduce((a, b) => a + b, 0);
   document.getElementById('logBtn').disabled = true;
-  document.getElementById('todayStatus').textContent = 'Opslaan...';
+  status.textContent = 'Opslaan...';
   try{
-    await apiPost({ person: me, date: ds, reps });
+    const res = await apiPost({ person: me, date: ds, reps, sets });
+    if(res && res.error) throw new Error(res.error);
     await refresh();
   }catch(err){
-    document.getElementById('todayStatus').textContent = 'Opslaan mislukt, probeer opnieuw.';
+    status.textContent = 'Opslaan mislukt, probeer opnieuw.';
   }
   document.getElementById('logBtn').disabled = false;
+}
+
+async function deleteLog(){
+  const ds = dateStrOffset(logOffset);
+  const when = logOffset === 0 ? 'vandaag' : 'gisteren';
+  if(!backendV2){
+    document.getElementById('todayStatus').textContent = 'Wissen werkt pas nadat de nieuwe Code.gs is geplakt en uitgerold (zie de handleiding).';
+    return;
+  }
+  if(!confirm('Je log voor ' + when + ' wissen?')) return;
+  const status = document.getElementById('todayStatus');
+  status.textContent = 'Wissen...';
+  try{
+    const res = await apiPost({ type: 'delete', person: me, date: ds });
+    if(res && res.error) throw new Error(res.error);
+    await refresh();
+  }catch(err){
+    status.textContent = 'Wissen mislukt, probeer opnieuw.';
+  }
+}
+
+/* ---------- profiel: hoeveel reeksen doe je normaal? ---------- */
+function renderSetsPicker(){
+  document.getElementById('app').style.display = 'none';
+  const cur = getSetCount(me);
+  let picker = document.getElementById('setsPick');
+  if(!picker){
+    picker = document.createElement('div');
+    picker.id = 'setsPick';
+    picker.className = 'card';
+    document.querySelector('.wrap').prepend(picker);
+  }
+  picker.innerHTML =
+    '<h3>Hoeveel reeksen doe je normaal per dag?</h3>' +
+    '<div class="stats-sub">Je krijgt zoveel invulvelden. Voor de km telt je grootste reeks, voor de beloningen het totaal.</div>' +
+    '<div class="sets-pick-row">' +
+      [1, 2, 3, 4, 5].map(n => '<button class="' + (n === cur ? 'selected' : '') + '" onclick="saveSetCount(' + n + ')">' + n + '</button>').join('') +
+    '</div>' +
+    '<button class="avatarCancelBtn" onclick="cancelSetsPicker()">Annuleren</button>';
+}
+
+function cancelSetsPicker(){
+  const picker = document.getElementById('setsPick');
+  if(picker) picker.remove();
+  showAppView();
+}
+
+async function saveSetCount(n){
+  try{ localStorage.setItem('pushup_setcount_' + me, String(n)); }catch(e){}
+  try{ await apiPost({ type: 'settings', person: me, setCount: n }); }catch(e){ /* lokaal bewaard, sync bij volgende keer */ }
+  const idx = cachedProfiles.findIndex(p => p.person === me);
+  if(idx >= 0){ cachedProfiles[idx].setCount = n; }
+  else{ cachedProfiles.push({ person: me, avatar: '', setCount: n }); }
+  const picker = document.getElementById('setsPick');
+  if(picker) picker.remove();
+  showAppView();
+  updateWhoami();
+  renderAllFromCache();
+}
+
+/* ---------- aankondiging: één week lang, weg te klikken ---------- */
+const NEWS_START = '2026-11-03', NEWS_DAYS = 7, NEWS_KEY = 'pushup_news_reeksen';
+function renderNews(){
+  const box = document.getElementById('newsBox');
+  let dismissed = false;
+  try{ dismissed = localStorage.getItem(NEWS_KEY) === '1'; }catch(e){}
+  const age = daysSince(NEWS_START);
+  if(dismissed || age < 0 || age >= NEWS_DAYS){ box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  box.innerHTML = '<div class="news-card"><button class="news-close" aria-label="Sluiten" onclick="dismissNews()">×</button>' +
+    '<div class="news-kicker">Nieuw: reeksen</div>' +
+    '<ul>' +
+    '<li>Stel in je profiel (knop <b>reeksen</b>) in hoeveel reeksen je normaal doet, 1 tot 5. Op het startscherm vul je ze dan apart in.</li>' +
+    '<li>Voor de <b>kilometers</b> telt je grootste reeks.</li>' +
+    '<li>Voor de <b>beloningen</b> telt het totaal, dus die krijg je sneller.</li>' +
+    '</ul></div>';
+}
+function dismissNews(){
+  try{ localStorage.setItem(NEWS_KEY, '1'); }catch(e){}
+  document.getElementById('newsBox').style.display = 'none';
 }
 
 boot();
